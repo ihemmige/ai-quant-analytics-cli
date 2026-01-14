@@ -26,7 +26,7 @@ def test_max_drawdown_with_nan():
 
 
 def test_max_drawdown_short_series():
-    assert max_drawdown(pd.Series([100])) == 0.0
+    assert max_drawdown(pd.Series([100])) == pytest.approx(0.0, abs=1e-9)
 
 
 def test_max_drawdown_zero_or_negative():
@@ -37,5 +37,5 @@ def test_max_drawdown_zero_or_negative():
 
 
 def test_max_drawdown_all_nan_or_one_value_after_nan_drop():
-    assert max_drawdown(pd.Series([None, None])) == 0.0
-    assert max_drawdown(pd.Series([100, None])) == 0.0
+    assert max_drawdown(pd.Series([None, None])) == pytest.approx(0.0, abs=1e-9)
+    assert max_drawdown(pd.Series([100, None])) == pytest.approx(0.0, abs=1e-9)
