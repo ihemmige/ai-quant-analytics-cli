@@ -73,12 +73,9 @@ def realized_volatility(
         return 0.0
 
     log_returns = np.log(prices / prices.shift(1)).dropna()
-    print(log_returns)
     window_returns = log_returns.iloc[-window:]
-    print(window_returns)
     vol = window_returns.std(
         ddof=1
     )  # sample std to avoid downward bias on small windows
 
-    print(vol)
     return float(vol * np.sqrt(annualization_factor))
