@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+
 class Params(BaseModel):
     window: int | None = Field(
         default=None,

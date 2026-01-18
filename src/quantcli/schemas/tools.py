@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class ToolName(str, Enum):
     max_drawdown = "max_drawdown"
     realized_volatility = "realized_volatility"
