@@ -4,6 +4,9 @@ from quantcli.data import PriceProvider, PriceProviderError
 from typing import Callable, Sequence
 from quantcli.tools import total_return, max_drawdown, realized_volatility
 from quantcli.validate_intent import validate_intent
+from quantcli.router.llm_client import LLMClient
+from quantcli.router.router import route_query
+
 
 MetricFn = Callable[[Sequence[float], Params], float]
 
@@ -61,3 +64,10 @@ def run_intent(intent: Intent, provider: PriceProvider) -> Result | Refusal:
             "interpretation_notes": None,  # TODO
         },
     )
+
+def run_query(user_query: str, llm_client: LLMClient, price_provider: PriceProvider) -> Result | Refusal:
+    intent_or_refusal = route_query(user_query, llm_client)
+    if isinstance(intent_or_refusal, Refusal):
+        return intent_or_refusal
+
+    return run_intent(intent_or_refusal, price_provider)
