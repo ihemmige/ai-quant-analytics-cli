@@ -4,6 +4,7 @@ from quantcli.schemas.result import Result
 from quantcli.schemas.time_range import TimeRange
 from quantcli.schemas.tools import ToolName
 from quantcli.schemas.params import Params
+from quantcli.schemas.llm_refusal import LLMRefusal
 
 __all__ = [
     "Intent",
@@ -12,4 +13,5 @@ __all__ = [
     "TimeRange",
     "ToolName",
     "Params",
+    "LLMRefusal",
 ]

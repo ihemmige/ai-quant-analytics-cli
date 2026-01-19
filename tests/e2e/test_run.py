@@ -104,6 +104,7 @@ def test_realized_volatility_ok():
     assert result.metadata["interpretation_notes"] is None
     assert provider.calls == 1
 
+
 def test_provider_failure_returns_refusal():
     intent = Intent(
         tickers=["AAPL"],
@@ -118,6 +119,7 @@ def test_provider_failure_returns_refusal():
     assert "Failed to fetch price data" in result.reason
     assert result.allowed_capabilities == list(ToolName)
     assert provider.calls == 1
+
 
 def test_result_metadata_complete():
     intent = Intent(
@@ -138,13 +140,18 @@ def test_result_metadata_complete():
     assert "tool_version" in result.metadata
     assert "interpretation_notes" in result.metadata
 
+
 def test_all_tools_wired():
     for tool in ToolName:
         intent = Intent(
             tickers=["AAPL"],
             time_range=TimeRange(n_days=10),
             tool=tool,
-            params=Params(window=5, annualization_factor=252) if tool == ToolName.realized_volatility else Params(window=None),
+            params=(
+                Params(window=5, annualization_factor=252)
+                if tool == ToolName.realized_volatility
+                else Params(window=None)
+            ),
         )
         provider = FakePriceProvider()
         result = run(intent, provider)
