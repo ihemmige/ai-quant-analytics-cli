@@ -1,8 +1,10 @@
 from quantcli.orchestrator import run_query
 from quantcli.router.fake_llm_client import FakeLLMClient
-from quantcli.schemas import Refusal, ToolName
+from quantcli.schemas.refusal import Refusal
+from quantcli.schemas.tool_name import ToolName
 from quantcli.data.fake_price_provider import FakePriceProvider
 import pytest
+
 
 def test_run_query_refusal_short_circuits():
     user_query = "What is the max drawdown for AAPL over some days?"
@@ -16,9 +18,9 @@ def test_run_query_refusal_short_circuits():
     """
     llm_client = FakeLLMClient(llm_response)
     price_provider = FakePriceProvider()
-    
+
     result = run_query(user_query, llm_client, price_provider)
-    
+
     assert isinstance(result, Refusal)
     assert result.reason == "AMBIGUOUS"
     assert len(llm_client.calls) == 1
@@ -26,20 +28,22 @@ def test_run_query_refusal_short_circuits():
     assert result.allowed_capabilities == list(ToolName)
     assert result.clarifying_question is None
 
+
 def test_run_query_malformed_llm_response():
     user_query = "What is the max drawdown for AAPL over last 30 days?"
     llm_response = "not valid json"
     llm_client = FakeLLMClient(llm_response)
     price_provider = FakePriceProvider()
-    
+
     result = run_query(user_query, llm_client, price_provider)
-    
+
     assert isinstance(result, Refusal)
     assert result.reason == "LLM_OUTPUT_NOT_JSON"
     assert len(llm_client.calls) == 1
     assert price_provider.calls == 0
     assert result.allowed_capabilities == list(ToolName)
     assert result.clarifying_question is None
+
 
 def test_run_query_happy_path_total_return():
     user_query = "What is the total return for AAPL over last 10 days?"
@@ -72,6 +76,7 @@ def test_run_query_happy_path_total_return():
     assert len(llm_client.calls) == 1
     assert price_provider.calls == 1
 
+
 def test_run_query_happy_path_max_drawdown():
     user_query = "What is the max drawdown for AAPL over last 10 days?"
     llm_response = """
@@ -103,8 +108,11 @@ def test_run_query_happy_path_max_drawdown():
     assert len(llm_client.calls) == 1
     assert price_provider.calls == 1
 
+
 def test_run_query_happy_path_realized_volatility():
-    user_query = "What is the realized volatility for AAPL over last 10 days with a window of 5?"
+    user_query = (
+        "What is the realized volatility for AAPL over last 10 days with a window of 5?"
+    )
     llm_response = """
     {
         "type": "intent",
@@ -137,8 +145,11 @@ def test_run_query_happy_path_realized_volatility():
     assert len(llm_client.calls) == 1
     assert price_provider.calls == 1
 
+
 def test_run_query_intent_fails_validation():
-    user_query = "What is the max drawdown for AAPL over last 10 days with a window of 5?"
+    user_query = (
+        "What is the max drawdown for AAPL over last 10 days with a window of 5?"
+    )
     llm_response = """
     {
         "type": "intent",
@@ -158,7 +169,9 @@ def test_run_query_intent_fails_validation():
     result = run_query(user_query, llm_client, price_provider)
 
     assert isinstance(result, Refusal)
-    assert "Window parameter is not applicable" in result.reason and "max_drawdown" in result.reason
+    assert (
+        "Window parameter is not applicable" in result.reason
+        and "max_drawdown" in result.reason
+    )
     assert len(llm_client.calls) == 1
     assert price_provider.calls == 0
-

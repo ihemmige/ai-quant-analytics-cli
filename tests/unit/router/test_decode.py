@@ -1,5 +1,8 @@
 from quantcli.router.decode import decode_llm_output
-from quantcli.schemas import Intent, Refusal, LLMRefusal, ToolName
+from quantcli.schemas.intent import Intent
+from quantcli.schemas.refusal import Refusal
+from quantcli.schemas.llm_refusal import LLMRefusal
+from quantcli.schemas.tool_name import ToolName
 import pytest
 
 # Helper for allowed capabilities

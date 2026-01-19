@@ -1,4 +1,8 @@
-from quantcli.schemas import Intent, TimeRange, Params, Refusal, ToolName
+from quantcli.schemas.intent import Intent
+from quantcli.schemas.params import Params
+from quantcli.schemas.time_range import TimeRange
+from quantcli.schemas.refusal import Refusal
+from quantcli.schemas.tool_name import ToolName
 from quantcli.validate_intent import validate_intent
 
 

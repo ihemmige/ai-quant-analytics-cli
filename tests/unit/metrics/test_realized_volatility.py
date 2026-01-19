@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from quantcli.tools.metrics import realized_volatility
-from quantcli.schemas import Params
+from quantcli.schemas.params import Params
 
 
 def test_realized_volatility_constant_prices_is_zero():

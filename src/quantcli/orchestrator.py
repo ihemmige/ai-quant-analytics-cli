@@ -65,7 +65,10 @@ def run_intent(intent: Intent, provider: PriceProvider) -> Result | Refusal:
         },
     )
 
-def run_query(user_query: str, llm_client: LLMClient, price_provider: PriceProvider) -> Result | Refusal:
+
+def run_query(
+    user_query: str, llm_client: LLMClient, price_provider: PriceProvider
+) -> Result | Refusal:
     intent_or_refusal = route_query(user_query, llm_client)
     if isinstance(intent_or_refusal, Refusal):
         return intent_or_refusal

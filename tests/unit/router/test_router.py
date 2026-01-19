@@ -1,6 +1,9 @@
 from quantcli.router.fake_llm_client import FakeLLMClient
 from quantcli.router.router import route_query
-from quantcli.schemas import Intent, Refusal, ToolName
+from quantcli.schemas.intent import Intent
+from quantcli.schemas.refusal import Refusal
+from quantcli.schemas.tool_name import ToolName
+
 
 def test_route_query_empty_input():
     user_text = "   "

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from quantcli.schemas.tools import ToolName
+from quantcli.schemas.tool_name import ToolName
 
 
 class Refusal(BaseModel):

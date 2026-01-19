@@ -1,14 +1,11 @@
-from quantcli.schemas import (
-    Intent,
-    Result,
-    Refusal,
-    ToolName,
-    Params,
-    TimeRange,
-)
+from quantcli.schemas.intent import Intent
+from quantcli.schemas.result import Result
+from quantcli.schemas.refusal import Refusal
+from quantcli.schemas.tool_name import ToolName
+from quantcli.schemas.params import Params
+from quantcli.schemas.time_range import TimeRange
 from quantcli.orchestrator import run_intent
-from quantcli.data import FakePriceProvider, PriceProviderError
-
+from quantcli.data.fake_price_provider import FakePriceProvider
 import pytest
 
 
