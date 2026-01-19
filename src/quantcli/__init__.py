@@ -2,6 +2,6 @@
 from . import tools
 from . import schemas
 from .validate_intent import validate_intent
-from .run import run
+from .orchestrator import run_intent
 
-__all__ = ["tools", "schemas", "validate_intent", "run"]
+__all__ = ["tools", "schemas", "validate_intent", "run_intent"]

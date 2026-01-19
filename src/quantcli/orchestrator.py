@@ -1,6 +1,5 @@
 from __future__ import annotations
 from quantcli.schemas import Intent, Result, Refusal, ToolName, Params
-import quantcli.tools as tools
 from quantcli.data import PriceProvider, PriceProviderError
 from typing import Callable, Sequence
 from quantcli.tools import total_return, max_drawdown, realized_volatility
@@ -15,7 +14,7 @@ METRICS: dict[ToolName, MetricFn] = {
 }
 
 
-def run(intent: Intent, provider: PriceProvider) -> Result | Refusal:
+def run_intent(intent: Intent, provider: PriceProvider) -> Result | Refusal:
     validated_intent: Intent | Refusal = validate_intent(intent)
     if isinstance(validated_intent, Refusal):
         return validated_intent
