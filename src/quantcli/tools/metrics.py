@@ -1,81 +1,88 @@
-import pandas as pd
+from __future__ import annotations
+
 import numpy as np
 
+from quantcli.schemas import Params  # adjust import to your actual Params location
 
-def max_drawdown(prices: pd.Series) -> float:
-    """Compute the maximum peak-to-trough drawdown of a price series.
 
-    Args:
-        prices (pd.Series): A series of prices.
-
-    Returns:
-        float: The maximum drawdown of the series of prices, a value in [0, 1], where 0.2 corresponds to a 20% drawdown.
+def _clean_prices(prices: np.ndarray) -> np.ndarray:
     """
-    prices = prices.dropna()
+    Enforce the numeric contract for metric kernels:
+    - 1-D float64 array
+    - NaN/inf removed
+    """
+    if not isinstance(prices, np.ndarray):
+        raise TypeError("prices must be a numpy ndarray.")
+    if prices.ndim != 1:
+        raise ValueError("prices must be a 1-D array.")
 
-    if (prices <= 0).any():
-        raise ValueError("Prices must be strictly positive to compute drawdown.")
+    if prices.dtype != np.float64:
+        prices = prices.astype(np.float64, copy=False)
 
-    if len(prices) < 2:
+    # Drop NaN / inf (equivalent intent to pandas dropna)
+    return prices[np.isfinite(prices)]
+
+
+def total_return(prices: np.ndarray, params: Params) -> float:
+    """
+    Total return of a price series, where 0.1 corresponds to a 10% total return.
+    """
+    cleaned_prices = _clean_prices(prices)
+
+    if cleaned_prices.size < 2:
         return 0.0
 
-    cumulative_max = prices.cummax()
-    drawdown = (cumulative_max - prices) / cumulative_max
-    return float(drawdown.max())
-
-
-def total_return(prices: pd.Series) -> float:
-    """Calculate the total return of a series of prices.
-
-    Args:
-        prices (pd.Series): A series of prices.
-
-    Returns:
-        float: The total return of the series of prices, where 0.1 corresponds to a 10% total return.
-    """
-    prices = prices.dropna()
-
-    if len(prices) < 2:
-        return 0.0
-
-    if (prices <= 0).any():
+    if np.any(cleaned_prices <= 0):
         raise ValueError("Prices must be strictly positive to compute total return.")
 
-    return float((prices.iloc[-1] - prices.iloc[0]) / prices.iloc[0])
+    return float((cleaned_prices[-1] - cleaned_prices[0]) / cleaned_prices[0])
 
 
-def realized_volatility(
-    prices: pd.Series,
-    window: int,
-    annualization_factor: int = 252,
-) -> float:
-    """Calculate the annualized realized volatility of a series of prices.
-
-    Args:
-        prices (pd.Series): A series of prices.
-        window (int): window size.
-        annualization_factor (int, optional): The factor to annualize the volatility. Defaults to 252.
-
-    Returns:
-        float: The annualized realized volatility of the series of prices, computed as the standard
-        deviation of log returns over the specified window, annualized by the square root of the annualization factor.
+def max_drawdown(prices: np.ndarray, params: Params) -> float:
     """
-    prices = prices.dropna()
+    Maximum peak-to-trough drawdown of a price series, in [0, 1].
+    """
+    cleaned_prices = _clean_prices(prices)
 
+    if cleaned_prices.size < 2:
+        return 0.0
+
+    if np.any(cleaned_prices <= 0):
+        raise ValueError("Prices must be strictly positive to compute drawdown.")
+
+    cumulative_max = np.maximum.accumulate(cleaned_prices)
+    drawdown = (cumulative_max - cleaned_prices) / cumulative_max
+    return float(np.max(drawdown))
+
+
+def realized_volatility(prices: np.ndarray, params: Params) -> float:
+    """
+    Annualized realized volatility computed as the sample std (ddof=1) of log returns
+    over the specified window, scaled by sqrt(annualization_factor).
+    """
+    cleaned_prices = _clean_prices(prices)
+
+    window = params.window
+    if window is None:
+        raise ValueError("Window must be provided for realized volatility.")
     if window <= 0:
         raise ValueError("Window must be a positive integer.")
 
-    if (prices <= 0).any():
+    if np.any(cleaned_prices <= 0):
         raise ValueError("Prices must be strictly positive to compute log returns.")
 
     # Need at least window+1 prices to compute window log returns
-    if len(prices) - 1 < window:
+    if cleaned_prices.size < window + 1:
         return 0.0
 
-    log_returns = np.log(prices / prices.shift(1)).dropna()
-    window_returns = log_returns.iloc[-window:]
-    vol = window_returns.std(
-        ddof=1
-    )  # sample std to avoid downward bias on small windows
+    log_returns = np.log(
+        cleaned_prices[1:] / cleaned_prices[:-1]
+    )  # length = cleaned_prices.size - 1
+    window_returns = log_returns[-window:]
 
-    return float(vol * np.sqrt(annualization_factor))
+    # sample std requires at least 2 observations
+    if window_returns.size < 2:
+        return 0.0
+
+    vol = float(np.std(window_returns, ddof=1))
+    return vol * float(np.sqrt(params.annualization_factor))

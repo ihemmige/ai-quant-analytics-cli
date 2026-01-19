@@ -1,41 +1,66 @@
 import pytest
-import pandas as pd
+import numpy as np
 from quantcli.tools.metrics import max_drawdown
+from quantcli.schemas.params import Params
 
 
 def test_max_drawdown_basic():
-    prices = pd.Series([100, 120, 110, 90, 95, 130, 120, 80, 100])
+    prices = np.array([100, 120, 110, 90, 95, 130, 120, 80, 100], dtype=float)
+    params = Params(window=None)
     expected = (130 - 80) / 130
-    assert max_drawdown(prices) == pytest.approx(expected, abs=1e-6)
+    assert max_drawdown(prices, params) == pytest.approx(expected, abs=1e-6)
 
 
 def test_max_drawdown_no_drawdown():
-    prices = pd.Series([100, 110, 120, 130, 140])
-    assert max_drawdown(prices) == 0.0
+    prices = np.array([100, 110, 120, 130, 140], dtype=float)
+    params = Params(window=None)
+    assert max_drawdown(prices, params) == 0.0
 
 
 def test_max_drawdown_all_same():
-    prices = pd.Series([100, 100, 100, 100])
-    assert max_drawdown(prices) == 0.0
+    prices = np.array([100, 100, 100, 100], dtype=float)
+    params = Params(window=None)
+    assert max_drawdown(prices, params) == 0.0
 
 
 def test_max_drawdown_with_nan():
-    prices = pd.Series([100, None, 120, 110, None, 90, 95])
+    prices = np.array([100, np.nan, 120, 110, np.nan, 90, 95], dtype=float)
+    params = Params(window=None)
     expected = (120 - 90) / 120
-    assert max_drawdown(prices) == pytest.approx(expected, abs=1e-9)
+    assert max_drawdown(prices, params) == pytest.approx(expected, abs=1e-9)
 
 
 def test_max_drawdown_short_series():
-    assert max_drawdown(pd.Series([100])) == pytest.approx(0.0, abs=1e-9)
+    prices = np.array([100], dtype=float)
+    params = Params(window=None)
+    assert max_drawdown(prices, params) == pytest.approx(0.0, abs=1e-9)
 
 
 def test_max_drawdown_zero_or_negative():
+    params = Params(window=None)
     with pytest.raises(ValueError):
-        max_drawdown(pd.Series([100, 0, 120]))
+        max_drawdown(np.array([100, 0, 120], dtype=float), params)
     with pytest.raises(ValueError):
-        max_drawdown(pd.Series([100, -10, 120]))
+        max_drawdown(np.array([100, -10, 120], dtype=float), params)
 
 
 def test_max_drawdown_all_nan_or_one_value_after_nan_drop():
-    assert max_drawdown(pd.Series([None, None])) == pytest.approx(0.0, abs=1e-9)
-    assert max_drawdown(pd.Series([100, None])) == pytest.approx(0.0, abs=1e-9)
+    prices = np.array([np.nan, np.nan], dtype=float)
+    params = Params(window=None)
+    assert max_drawdown(prices, params) == pytest.approx(0.0, abs=1e-9)
+
+
+def test_max_drawdown_all_nans():
+    prices = np.array([np.nan, np.nan], dtype=float)
+    params = Params(window=None)
+    assert max_drawdown(prices, params) == pytest.approx(0.0, abs=1e-9)
+
+
+def test_max_drawdown_type_and_shape_contract():
+    params = Params(window=None)
+    # Not a numpy array
+    with pytest.raises(TypeError):
+        max_drawdown([100, 110, 120], params)
+    # Not 1-D
+    with pytest.raises(ValueError):
+        max_drawdown(np.array([[100, 110], [120, 130]], dtype=float), params)
