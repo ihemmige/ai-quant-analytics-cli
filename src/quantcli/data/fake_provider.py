@@ -30,6 +30,9 @@ class FakePriceProvider(PriceProvider):
             },
         )
 
+    def name(self) -> str:
+        return f"FakePriceProvider[{self.fixture}]"
+
     def get_adjusted_close(self, ticker: str, n_days: int) -> Sequence[float]:
         if n_days < 0:
             raise ValueError("n_days must be >= 0")
@@ -57,7 +60,9 @@ class FakePriceProvider(PriceProvider):
             if i <= peak_idx:
                 val = 100.0 + (peak - 100.0) * (i / peak_idx)
             else:
-                val = peak + (trough - peak) * ((i - peak_idx) / (n_days - 1 - peak_idx))
+                val = peak + (trough - peak) * (
+                    (i - peak_idx) / (n_days - 1 - peak_idx)
+                )
             out.append(float(val))
         return out
 

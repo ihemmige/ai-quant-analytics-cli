@@ -7,3 +7,7 @@ class PriceProvider(Protocol):
         ticker: str,
         n_days: int,  # trading days
     ) -> Sequence[float]: ...
+
+    def name(self) -> str:
+        """Return a human-readable provider name."""
+        ...
