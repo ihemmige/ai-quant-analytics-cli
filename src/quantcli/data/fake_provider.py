@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Callable, Dict, Literal, Sequence
+import numpy as np
 
 from .price_provider import PriceProvider
 
@@ -13,10 +14,11 @@ class PriceProviderError(RuntimeError):
 FixtureName = Literal["monotonic_up", "drawdown", "short_1", "invalid_non_positive"]
 
 
-@dataclass(frozen=True)
+@dataclass
 class FakePriceProvider(PriceProvider):
     fixture: FixtureName = "monotonic_up"
     fail: bool = False
+    calls: int = 0
 
     def __post_init__(self) -> None:
         object.__setattr__(
@@ -31,14 +33,16 @@ class FakePriceProvider(PriceProvider):
         )
 
     def name(self) -> str:
-        return f"FakePriceProvider[{self.fixture}]"
+        return f"FakePriceProvider"
 
     def get_adjusted_close(self, ticker: str, n_days: int) -> Sequence[float]:
+        self.calls += 1
         if n_days < 0:
             raise ValueError("n_days must be >= 0")
         if self.fail:
             raise PriceProviderError("Injected provider failure for testing.")
-        return self._fixtures[self.fixture](ticker, n_days)
+        arr = self._fixtures[self.fixture](ticker, n_days)
+        return np.array(arr, dtype=float)
 
     def _monotonic_up(self, ticker: str, n_days: int) -> Sequence[float]:
         base = 100.0

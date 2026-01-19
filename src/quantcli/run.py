@@ -19,16 +19,21 @@ def run(intent: Intent, provider: PriceProvider) -> Result | Refusal:
     validated_intent: Intent | Refusal = validate_intent(intent)
     if isinstance(validated_intent, Refusal):
         return validated_intent
+
     try:
-        prices = provider.get_prices(
+        prices = provider.get_adjusted_close(
             ticker=validated_intent.tickers[0],
             n_days=validated_intent.time_range.n_days,
         )
     except PriceProviderError as e:
-        return Refusal(reason=f"Failed to fetch price data: {str(e)}")
+        return Refusal(
+            reason=f"Failed to fetch price data: {str(e)}",
+            clarifying_question=None,
+            allowed_capabilities=list(ToolName),
+        )
 
-    metric_fn = METRICS[validated_intent.tool]
-    if not metric_fn:
+    metric_fn = METRICS.get(validated_intent.tool)
+    if metric_fn is None:
         return Refusal(
             reason=f"Unsupported tool: {validated_intent.tool}",
             clarifying_question=None,
@@ -37,6 +42,12 @@ def run(intent: Intent, provider: PriceProvider) -> Result | Refusal:
 
     ret_value = metric_fn(prices, validated_intent.params)
 
+    annualization = (
+        validated_intent.params.annualization_factor
+        if validated_intent.tool == ToolName.realized_volatility
+        else None
+    )
+
     return Result(
         tool=validated_intent.tool,
         tickers=validated_intent.tickers,
@@ -44,7 +55,7 @@ def run(intent: Intent, provider: PriceProvider) -> Result | Refusal:
         metadata={
             "range_n_days": validated_intent.time_range.n_days,
             "window": validated_intent.params.window,
-            "annualization_factor": validated_intent.params.annualization_factor,
+            "annualization_factor": annualization,
             "data_points": len(prices),
             "price_source": provider.name(),
             "tool_version": "1.0.0",  # TODO
