@@ -1,10 +1,10 @@
-
-from quantcli.router import decode_llm_output
+from quantcli.router.decode import decode_llm_output
 from quantcli.schemas import Intent, Refusal, LLMRefusal, ToolName
 import pytest
 
 # Helper for allowed capabilities
 _ALLOWED_CAPABILITIES = list(ToolName)
+
 
 def test_decode_valid_intent_no_params():
     raw = """
@@ -22,8 +22,9 @@ def test_decode_valid_intent_no_params():
     assert isinstance(intent, Intent)
     assert intent.tickers == ["AAPL"]
     assert intent.time_range.n_days == 30
-    assert intent.tool == "total_return"
+    assert intent.tool == ToolName.total_return
     assert intent.params.window is None and intent.params.annualization_factor is 252
+
 
 def test_decode_valid_intent_with_params():
     raw = """
@@ -45,7 +46,7 @@ def test_decode_valid_intent_with_params():
     assert isinstance(intent, Intent)
     assert intent.tickers == ["NVDA"]
     assert intent.time_range.n_days == 60
-    assert intent.tool == "realized_volatility"
+    assert intent.tool == ToolName.realized_volatility
     assert intent.params.window == 20 and intent.params.annualization_factor == 252
 
 
@@ -100,6 +101,7 @@ def test_decode_not_object(raw):
     assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
     assert refusal.clarifying_question is None
 
+
 def test_decode_missing_type():
     raw = """
     {
@@ -116,6 +118,7 @@ def test_decode_missing_type():
     assert refusal.reason == "LLM_WRAPPER_INVALID_TYPE"
     assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
     assert refusal.clarifying_question is None
+
 
 def test_decode_invalid_type():
     raw = """
@@ -134,6 +137,7 @@ def test_decode_invalid_type():
     assert refusal.reason == "LLM_WRAPPER_INVALID_TYPE"
     assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
     assert refusal.clarifying_question is None
+
 
 def test_decode_invalid_types_extra():
     raw = """
@@ -154,6 +158,35 @@ def test_decode_invalid_types_extra():
     assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
     assert refusal.clarifying_question is None
 
+
+def test_intent_object_missing():
+    raw = """
+    {
+        "type": "intent"
+    }
+    """
+    refusal = decode_llm_output(raw)
+    assert refusal is not None
+    assert isinstance(refusal, Refusal)
+    assert refusal.reason == "LLM_WRAPPER_INVALID_KEYS"
+    assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
+    assert refusal.clarifying_question is None
+
+
+def test_refusal_object_missing():
+    raw = """
+    {
+        "type": "refusal"
+    }
+    """
+    refusal = decode_llm_output(raw)
+    assert refusal is not None
+    assert isinstance(refusal, Refusal)
+    assert refusal.reason == "LLM_WRAPPER_INVALID_KEYS"
+    assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
+    assert refusal.clarifying_question is None
+
+
 def test_intent_not_object():
     raw = """
     {
@@ -168,6 +201,7 @@ def test_intent_not_object():
     assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
     assert refusal.clarifying_question is None
 
+
 def test_refusal_not_object():
     raw = """
     {
@@ -181,6 +215,7 @@ def test_refusal_not_object():
     assert refusal.reason == "LLM_REFUSAL_NOT_OBJECT"
     assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
     assert refusal.clarifying_question is None
+
 
 def test_intent_schema_invalid():
     raw = """
@@ -199,6 +234,7 @@ def test_intent_schema_invalid():
     assert refusal.reason == "LLM_INTENT_SCHEMA_INVALID"
     assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
     assert refusal.clarifying_question is None
+
 
 def test_refusal_schema_invalid():
     raw = """

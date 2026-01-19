@@ -72,7 +72,7 @@ Extract into the required JSON wrapper now.
 """
 
 
-def build_messages(user_query: str) -> List[Dict[str, Any]]:
+def build_messages(user_query: str) -> List[Dict[str, str]]:
     return [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": USER_PROMPT_TEMPLATE.format(user_query=user_query)},

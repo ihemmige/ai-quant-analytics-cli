@@ -1,5 +1,3 @@
-from quantcli.router.decode import decode_llm_output
+from quantcli.router.router import route_query
 
-__all__ = [
-    "decode_llm_output",
-]
+__all__ = ["route_query"]

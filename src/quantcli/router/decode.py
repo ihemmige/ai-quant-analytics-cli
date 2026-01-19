@@ -40,7 +40,6 @@ def decode_llm_output(raw: str) -> Intent | LLMRefusal | Refusal:
     expected_keys = {"type", "intent"} if t == "intent" else {"type", "refusal"}
     if set(obj.keys()) != expected_keys:
         return _router_refusal("LLM_WRAPPER_INVALID_KEYS")
-
     if t == "intent":
         payload = obj.get("intent")
         if not isinstance(payload, dict):

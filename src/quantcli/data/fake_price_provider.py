@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable, Dict, Literal, Sequence
+from typing import Literal, Sequence
 import numpy as np
 
 from .price_provider import PriceProvider
