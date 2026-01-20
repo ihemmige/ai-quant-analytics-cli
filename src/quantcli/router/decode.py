@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from quantcli.schemas import Intent, Refusal, LLMRefusal
 from quantcli.tools.registry import supported_tools
 
+
 def _router_refusal(reason: str) -> Refusal:
     return Refusal(
         reason=reason,

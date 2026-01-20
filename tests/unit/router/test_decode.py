@@ -6,6 +6,7 @@ from quantcli.schemas.tool_name import ToolName
 import pytest
 from quantcli.tools.registry import supported_tools
 
+
 def test_decode_valid_intent_no_params():
     raw = """
     {

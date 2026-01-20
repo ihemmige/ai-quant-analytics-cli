@@ -4,6 +4,7 @@ from quantcli.router.decode import decode_llm_output
 from quantcli.router.llm_client import LLMClient
 from quantcli.tools.registry import supported_tools
 
+
 def route_query(user_text: str, llm: LLMClient) -> Intent | Refusal:
     user_text = user_text.strip()
     if user_text == "":
