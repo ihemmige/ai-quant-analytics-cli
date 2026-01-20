@@ -20,15 +20,22 @@ quantcli "max drawdown AAPL last 10 days"
 
 ## Example Queries
 ```bash
-quantcli "What was AAPL’s total return over the last 30 days?"
 quantcli "Compute the max drawdown for TSLA over the last 60 days."
 quantcli "Compute realized volatility for MSFT over the last 90 days with a 20 day window."
+quantcli "What was AAPL’s total return over the last 30 days?"
 ```
 
 ### Example refusal query (returns a structured refusal)
 ```bash
 quantcli "Compute realized volatility for MSFT over the last 90 days."
 ```
+
+## Implemented Metrics
+The following metrics are currently supported for single-asset analysis:
+
+- `max_drawdown`
+- `realized_volatility`
+- `total_return`
 
 ## Architecture
 ### Stage 1: Probabilistic Routing
@@ -58,15 +65,13 @@ flowchart LR
 ```
 Once decoding completes, no LLM output is consulted again.
 
-## Pluggable Components (Protocol-Based)
-- The LLM client and price provider are dependency-injected and replaceable
-- Any implementation may be used as long as it satisfies the defined protocol
-- All external components are treated as untrusted
-- Guardrails are enforced at boundaries, not by provider implementations
-- This enables deterministic testing, offline unit tests, and strict control over probabilistic components.
-
 ## Guarantees
-- No guessing, retries, or JSON repair
+- No guessing, retries, or JSON repair from LLM
 - Ambiguous or unsupported requests return an explicit, structured `Refusal` (no silent fallbacks)
 - Strict boundary between probabilistic routing and deterministic execution
 - JSON-only stdout (third-party stdout/stderr suppressed)
+
+## TODO
+- Additional metrics (e.g. rolling returns, downside risk)
+- Deterministic multi-asset and portfolio analytics
+- Internal logging for improved observability
