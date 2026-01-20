@@ -38,7 +38,7 @@ def run_intent(intent: Intent, provider: PriceProvider) -> Result | Refusal:
         return Refusal(
             reason=f"Unable to compute metric from available price data.",
             clarifying_question=None,
-            allowed_capabilities=allowed_capabilities,
+            allowed_capabilities=supported_tools(),
         )
 
     annualization = (
