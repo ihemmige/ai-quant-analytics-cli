@@ -4,10 +4,7 @@ from quantcli.schemas.refusal import Refusal
 from quantcli.schemas.llm_refusal import LLMRefusal
 from quantcli.schemas.tool_name import ToolName
 import pytest
-
-# Helper for allowed capabilities
-_ALLOWED_CAPABILITIES = list(ToolName)
-
+from quantcli.tools.registry import supported_tools
 
 def test_decode_valid_intent_no_params():
     raw = """
@@ -74,7 +71,7 @@ def test_decode_empty_output():
     assert refusal is not None
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "LLM_OUTPUT_EMPTY"
-    assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
+    assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
 
 
@@ -84,7 +81,7 @@ def test_decode_not_json():
     assert refusal is not None
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "LLM_OUTPUT_NOT_JSON"
-    assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
+    assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
 
 
@@ -101,7 +98,7 @@ def test_decode_not_object(raw):
     assert refusal is not None
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "LLM_OUTPUT_NOT_OBJECT"
-    assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
+    assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
 
 
@@ -119,7 +116,7 @@ def test_decode_missing_type():
     assert refusal is not None
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "LLM_WRAPPER_INVALID_TYPE"
-    assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
+    assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
 
 
@@ -138,7 +135,7 @@ def test_decode_invalid_type():
     assert refusal is not None
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "LLM_WRAPPER_INVALID_TYPE"
-    assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
+    assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
 
 
@@ -158,7 +155,7 @@ def test_decode_invalid_types_extra():
     assert refusal is not None
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "LLM_WRAPPER_INVALID_KEYS"
-    assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
+    assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
 
 
@@ -172,7 +169,7 @@ def test_intent_object_missing():
     assert refusal is not None
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "LLM_WRAPPER_INVALID_KEYS"
-    assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
+    assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
 
 
@@ -186,7 +183,7 @@ def test_refusal_object_missing():
     assert refusal is not None
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "LLM_WRAPPER_INVALID_KEYS"
-    assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
+    assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
 
 
@@ -201,7 +198,7 @@ def test_intent_not_object():
     assert refusal is not None
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "LLM_INTENT_NOT_OBJECT"
-    assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
+    assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
 
 
@@ -216,7 +213,7 @@ def test_refusal_not_object():
     assert refusal is not None
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "LLM_REFUSAL_NOT_OBJECT"
-    assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
+    assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
 
 
@@ -235,7 +232,7 @@ def test_intent_schema_invalid():
     assert refusal is not None
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "LLM_INTENT_SCHEMA_INVALID"
-    assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
+    assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
 
 
@@ -252,5 +249,5 @@ def test_refusal_schema_invalid():
     assert refusal is not None
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "LLM_REFUSAL_SCHEMA_INVALID"
-    assert refusal.allowed_capabilities == _ALLOWED_CAPABILITIES
+    assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None

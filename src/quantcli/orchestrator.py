@@ -1,48 +1,45 @@
 from __future__ import annotations
-from quantcli.schemas import Intent, Result, Refusal, ToolName, Params
+from quantcli.schemas import Intent, Result, Refusal, ToolName
 from quantcli.data import PriceProvider, PriceProviderError
-from typing import Callable, Sequence
-from quantcli.tools import total_return, max_drawdown, realized_volatility
 from quantcli.validate_intent import validate_intent
 from quantcli.router.llm_client import LLMClient
 from quantcli.router.router import route_query
-
-
-MetricFn = Callable[[Sequence[float], Params], float]
-
-METRICS: dict[ToolName, MetricFn] = {
-    ToolName.total_return: total_return,
-    ToolName.max_drawdown: max_drawdown,
-    ToolName.realized_volatility: realized_volatility,
-}
+from quantcli.tools.registry import supported_tools, get_metric
 
 
 def run_intent(intent: Intent, provider: PriceProvider) -> Result | Refusal:
-    validated_intent: Intent | Refusal = validate_intent(intent)
+    validated_intent = validate_intent(intent)
     if isinstance(validated_intent, Refusal):
         return validated_intent
+
+    metric_fn = get_metric(validated_intent.tool)
+    if metric_fn is None:
+        return Refusal(
+            reason=f"Requested tool is not supported.",
+            clarifying_question=None,
+            allowed_capabilities=supported_tools(),
+        )
 
     try:
         prices = provider.get_adjusted_close(
             ticker=validated_intent.tickers[0],
             n_days=validated_intent.time_range.n_days,
         )
-    except PriceProviderError as e:
+    except PriceProviderError:
         return Refusal(
-            reason=f"Failed to fetch price data: {str(e)}",
+            reason=f"Unable to retrieve valid price data.",
             clarifying_question=None,
-            allowed_capabilities=list(ToolName),
+            allowed_capabilities=supported_tools(),
         )
 
-    metric_fn = METRICS.get(validated_intent.tool)
-    if metric_fn is None:
+    try:
+        ret_value = metric_fn(prices, validated_intent.params)
+    except ValueError:
         return Refusal(
-            reason=f"Unsupported tool: {validated_intent.tool}",
+            reason=f"Unable to compute metric from available price data.",
             clarifying_question=None,
-            allowed_capabilities=list(ToolName),
+            allowed_capabilities=allowed_capabilities,
         )
-
-    ret_value = metric_fn(prices, validated_intent.params)
 
     annualization = (
         validated_intent.params.annualization_factor

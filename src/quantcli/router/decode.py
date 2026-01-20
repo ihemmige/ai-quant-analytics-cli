@@ -1,21 +1,16 @@
-from __future__ import annotations
-
 import json
 from typing import Any
 
 from pydantic import ValidationError
 
-from quantcli.schemas import Intent, Refusal, ToolName, LLMRefusal
-
-
-_ALLOWED_CAPABILITIES = list(ToolName)
-
+from quantcli.schemas import Intent, Refusal, LLMRefusal
+from quantcli.tools.registry import supported_tools
 
 def _router_refusal(reason: str) -> Refusal:
     return Refusal(
         reason=reason,
         clarifying_question=None,
-        allowed_capabilities=_ALLOWED_CAPABILITIES,
+        allowed_capabilities=supported_tools(),
     )
 
 

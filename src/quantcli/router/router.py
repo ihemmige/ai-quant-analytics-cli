@@ -2,16 +2,14 @@ from quantcli.schemas import Refusal, Intent, ToolName, LLMRefusal
 from quantcli.router.prompt import build_messages
 from quantcli.router.decode import decode_llm_output
 from quantcli.router.llm_client import LLMClient
-
-_ALLOWED_CAPABILITIES = list(ToolName)
-
+from quantcli.tools.registry import supported_tools
 
 def route_query(user_text: str, llm: LLMClient) -> Intent | Refusal:
     user_text = user_text.strip()
     if user_text == "":
         return Refusal(
             reason="USER_QUERY_EMPTY",
-            allowed_capabilities=_ALLOWED_CAPABILITIES,
+            allowed_capabilities=supported_tools(),
             clarifying_question=None,
         )
 
@@ -22,7 +20,7 @@ def route_query(user_text: str, llm: LLMClient) -> Intent | Refusal:
     except Exception:
         return Refusal(
             reason="LLM_CLIENT_ERROR",
-            allowed_capabilities=_ALLOWED_CAPABILITIES,
+            allowed_capabilities=supported_tools(),
             clarifying_question=None,
         )
 
@@ -31,7 +29,7 @@ def route_query(user_text: str, llm: LLMClient) -> Intent | Refusal:
     if isinstance(decoded_output, LLMRefusal):
         return Refusal(
             reason=decoded_output.reason,
-            allowed_capabilities=_ALLOWED_CAPABILITIES,
+            allowed_capabilities=supported_tools(),
             clarifying_question=None,
         )
 

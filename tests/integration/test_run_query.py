@@ -4,6 +4,7 @@ from quantcli.schemas.refusal import Refusal
 from quantcli.schemas.tool_name import ToolName
 from quantcli.data.fake_price_provider import FakePriceProvider
 import pytest
+from quantcli.tools.registry import supported_tools
 
 
 def test_run_query_refusal_short_circuits():
@@ -25,7 +26,7 @@ def test_run_query_refusal_short_circuits():
     assert result.reason == "AMBIGUOUS"
     assert len(llm_client.calls) == 1
     assert price_provider.calls == 0
-    assert result.allowed_capabilities == list(ToolName)
+    assert result.allowed_capabilities == supported_tools()
     assert result.clarifying_question is None
 
 
@@ -41,7 +42,7 @@ def test_run_query_malformed_llm_response():
     assert result.reason == "LLM_OUTPUT_NOT_JSON"
     assert len(llm_client.calls) == 1
     assert price_provider.calls == 0
-    assert result.allowed_capabilities == list(ToolName)
+    assert result.allowed_capabilities == supported_tools()
     assert result.clarifying_question is None
 
 

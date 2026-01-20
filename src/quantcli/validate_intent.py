@@ -1,4 +1,5 @@
 from quantcli.schemas import Intent, Refusal, ToolName
+from quantcli.tools.registry import supported_tools
 
 
 def validate_intent(intent: Intent) -> Intent | Refusal:
@@ -20,7 +21,7 @@ def validate_intent(intent: Intent) -> Intent | Refusal:
         return Refusal(
             reason="Only single-asset metrics currently supported.",
             clarifying_question="Provide exactly one ticker symbol.",
-            allowed_capabilities=list(ToolName),
+            allowed_capabilities=supported_tools(),
         )
 
     # B. Range must support returns
@@ -28,7 +29,7 @@ def validate_intent(intent: Intent) -> Intent | Refusal:
         return Refusal(
             reason="Time range must include at least 2 trading days to compute returns.",
             clarifying_question="Provide a time range with at least 2 trading days.",
-            allowed_capabilities=list(ToolName),
+            allowed_capabilities=supported_tools(),
         )
 
     # C + E. Realized volatility rules
@@ -38,14 +39,14 @@ def validate_intent(intent: Intent) -> Intent | Refusal:
             return Refusal(
                 reason="Realized volatility requires a window parameter.",
                 clarifying_question="Provide a window parameter for realized volatility.",
-                allowed_capabilities=list(ToolName),
+                allowed_capabilities=supported_tools(),
             )
         # window parameter must be less than the number of trading days in time range
         if intent.params.window >= intent.time_range.n_days:
             return Refusal(
                 reason="Window parameter must be less than the number of trading days in the time range.",
                 clarifying_question=f"Provide a window parameter less than {intent.time_range.n_days}.",
-                allowed_capabilities=list(ToolName),
+                allowed_capabilities=supported_tools(),
             )
 
     # D. Window not allowed for other metrics
@@ -53,7 +54,7 @@ def validate_intent(intent: Intent) -> Intent | Refusal:
         return Refusal(
             reason=f"Window parameter is not applicable for {_tool_label(intent.tool)}.",
             clarifying_question=f"Remove the window parameter for {_tool_label(intent.tool)}.",
-            allowed_capabilities=list(ToolName),
+            allowed_capabilities=supported_tools(),
         )
 
     return intent

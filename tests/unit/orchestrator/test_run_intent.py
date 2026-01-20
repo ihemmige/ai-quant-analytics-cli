@@ -6,6 +6,7 @@ from quantcli.schemas.params import Params
 from quantcli.schemas.time_range import TimeRange
 from quantcli.orchestrator import run_intent
 from quantcli.data.fake_price_provider import FakePriceProvider
+from quantcli.tools.registry import TOOL_REGISTRY, supported_tools
 import pytest
 
 
@@ -21,7 +22,7 @@ def test_invalid_intent_skips_provider():
 
     assert isinstance(result, Refusal)
     assert provider.calls == 0
-    assert result.allowed_capabilities == list(ToolName)
+    assert result.allowed_capabilities == supported_tools()
     assert "single-asset metrics" in result.reason
     assert "Provide exactly one ticker symbol" in result.clarifying_question
 
@@ -113,8 +114,8 @@ def test_provider_failure_returns_refusal():
     result = run_intent(intent, provider)
 
     assert isinstance(result, Refusal)
-    assert "Failed to fetch price data" in result.reason
-    assert result.allowed_capabilities == list(ToolName)
+    assert result.reason == "Unable to retrieve valid price data."
+    assert result.allowed_capabilities == supported_tools()
     assert provider.calls == 1
 
 
@@ -138,8 +139,10 @@ def test_result_metadata_complete():
     assert "interpretation_notes" in result.metadata
 
 
-def test_all_tools_wired():
-    for tool in ToolName:
+def test_all_registry_defined_tools_wired():
+    assert set(TOOL_REGISTRY.keys()).issubset(set(ToolName))
+
+    for tool in TOOL_REGISTRY.keys():
         intent = Intent(
             tickers=["AAPL"],
             time_range=TimeRange(n_days=10),

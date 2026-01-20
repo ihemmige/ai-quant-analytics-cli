@@ -3,6 +3,7 @@ from quantcli.router.router import route_query
 from quantcli.schemas.intent import Intent
 from quantcli.schemas.refusal import Refusal
 from quantcli.schemas.tool_name import ToolName
+from quantcli.tools.registry import supported_tools
 
 
 def test_route_query_empty_input():
@@ -12,7 +13,7 @@ def test_route_query_empty_input():
 
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "USER_QUERY_EMPTY"
-    assert refusal.allowed_capabilities == list(ToolName)
+    assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
     assert len(llm.calls) == 0
 
@@ -56,7 +57,7 @@ def test_route_query_llm_refusal():
 
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "AMBIGUOUS"
-    assert refusal.allowed_capabilities == list(ToolName)
+    assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
     assert len(llm.calls) == 1
 
@@ -69,7 +70,7 @@ def test_route_query_malformed_llm_response():
 
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "LLM_OUTPUT_NOT_JSON"
-    assert refusal.allowed_capabilities == list(ToolName)
+    assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
     assert len(llm.calls) == 1
 
@@ -81,7 +82,7 @@ def test_route_query_llm_exception():
 
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "LLM_CLIENT_ERROR"
-    assert refusal.allowed_capabilities == list(ToolName)
+    assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
     assert len(llm.calls) == 1
 
