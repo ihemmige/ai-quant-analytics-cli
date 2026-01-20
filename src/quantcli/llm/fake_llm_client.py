@@ -1,13 +1,13 @@
-from quantcli.llm.llm_client import LLMClient
-from typing import Sequence, Mapping
+from quantcli.llm.llm_client import LLMClient, Message
+from typing import Sequence
 
 
 class FakeLLMClient(LLMClient):
     def __init__(self, response: str | Exception):
         self._response = response
-        self.calls: list[Sequence[Mapping[str, str]]] = []
+        self.calls: list[Sequence[Message]] = []
 
-    def complete(self, messages: Sequence[Mapping[str, str]]) -> str:
+    def complete(self, messages: Sequence[Message]) -> str:
         self.calls.append(messages)
         if isinstance(self._response, Exception):
             raise self._response
