@@ -1,4 +1,4 @@
-pandas
-pytest
-yfinance
-anthropic
+anthropic==0.76.0
+pydantic==2.12.0
+numpy==2.1.0
+yfinance==1.0

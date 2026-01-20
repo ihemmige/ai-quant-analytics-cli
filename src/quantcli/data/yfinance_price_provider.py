@@ -1,4 +1,7 @@
 # quantcli/data/yfinance_price_provider.py
+import contextlib
+import io
+
 import numpy as np
 import pandas as pd
 
@@ -13,10 +16,12 @@ class YFinancePriceProvider(PriceProvider):
         try:
             import yfinance as yf
 
-            df = yf.Ticker(ticker).history(
-                period=f"{n_days}d",
-                auto_adjust=True,  # adjusted close
-            )
+            # yfinance/Yahoo sometimes prints warnings/errors; never leak to CLI stdout/stderr
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                df = yf.Ticker(ticker).history(
+                    period=f"{n_days}d",
+                    auto_adjust=True,  # adjusted close
+                )
         except Exception as e:
             raise PriceProviderError("yfinance history failed") from e
 
