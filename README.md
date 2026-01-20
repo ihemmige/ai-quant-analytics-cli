@@ -67,7 +67,7 @@ Once decoding completes, no LLM output is consulted again.
 
 ## Guarantees
 - No guessing, retries, or JSON repair from LLM
-- Ambiguous or unsupported requests return an explicit, structured `Refusal` (no silent fallbacks)
+- Ambiguous or unsupported queries return an explicit, structured `Refusal` (no silent fallbacks)
 - Strict boundary between probabilistic routing and deterministic execution
 - JSON-only stdout (third-party stdout/stderr suppressed)
 
