@@ -58,7 +58,7 @@ flowchart LR
   V -->|valid| P["Price provider (yfinance)"]
 
   P -->|provider error| Rf
-  P --> M["Deterministic metrics (NumPy)"]
+  P --> M["Metrics"]
 
   M -->|metric error| Rf
   M --> Rs["Result"]
