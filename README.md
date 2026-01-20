@@ -5,7 +5,7 @@ A guardrail-first CLI for financial analytics, using an LLM for intent parsing a
 ## Features
 - Natural language → strict, schema-validated intent
 - Deterministic, unit-tested financial metrics (no AI in computation)
-- Hard failure modes: every run returns a `Result` or a structured `Refusal`
+- Validation-first execution with explicit failure modes (`Result` or `Refusal`)
 - JSON-only output with exit codes (automation-safe)
 
 ## Install & Run
@@ -71,7 +71,7 @@ Once decoding completes, no LLM output is consulted again.
 - Strict boundary between probabilistic routing and deterministic execution
 - JSON-only stdout (third-party stdout/stderr suppressed)
 
-## TODO
+## Future Enhancements
 - Additional metrics (e.g. rolling returns, downside risk)
 - Deterministic multi-asset and portfolio analytics
 - Internal logging for improved observability
