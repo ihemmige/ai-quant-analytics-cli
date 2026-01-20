@@ -1,5 +1,5 @@
 from quantcli.orchestrator import run_query
-from quantcli.router.fake_llm_client import FakeLLMClient
+from quantcli.llm.fake_llm_client import FakeLLMClient
 from quantcli.schemas.refusal import Refusal
 from quantcli.schemas.tool_name import ToolName
 from quantcli.data.fake_price_provider import FakePriceProvider

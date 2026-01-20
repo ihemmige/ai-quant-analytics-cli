@@ -1,4 +1,4 @@
-from quantcli.router.llm_client import LLMClient
+from quantcli.llm.llm_client import LLMClient
 from typing import Sequence, Mapping
 
 

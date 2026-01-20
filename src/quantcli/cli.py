@@ -6,7 +6,7 @@ from quantcli.data.yfinance_price_provider import YFinancePriceProvider
 from quantcli.schemas.refusal import Refusal
 from quantcli.orchestrator import run_query
 
-from quantcli.router.fake_llm_client import FakeLLMClient
+from quantcli.llm.fake_llm_client import FakeLLMClient
 
 
 HARDCODED_ROUTER_RESPONSE = (

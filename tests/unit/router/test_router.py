@@ -1,4 +1,4 @@
-from quantcli.router.fake_llm_client import FakeLLMClient
+from quantcli.llm.fake_llm_client import FakeLLMClient
 from quantcli.router.router import route_query
 from quantcli.schemas.intent import Intent
 from quantcli.schemas.refusal import Refusal

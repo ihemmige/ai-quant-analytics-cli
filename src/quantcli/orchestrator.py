@@ -2,7 +2,7 @@ from __future__ import annotations
 from quantcli.schemas import Intent, Result, Refusal, ToolName
 from quantcli.data import PriceProvider, PriceProviderError
 from quantcli.validate_intent import validate_intent
-from quantcli.router.llm_client import LLMClient
+from quantcli.llm.llm_client import LLMClient
 from quantcli.router.router import route_query
 from quantcli.tools.registry import supported_tools, get_metric
 
