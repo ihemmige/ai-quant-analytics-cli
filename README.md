@@ -25,7 +25,7 @@ quantcli "Compute realized volatility for MSFT over the last 90 days with a 20 d
 quantcli "What was AAPL’s total return over the last 30 days?"
 ```
 
-### Example refusal query (returns a structured refusal)
+### Example invalid query (returns a structured refusal)
 ```bash
 quantcli "Compute realized volatility for MSFT over the last 90 days."
 ```
