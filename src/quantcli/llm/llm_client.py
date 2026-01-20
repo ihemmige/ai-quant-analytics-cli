@@ -1,10 +1,8 @@
-from __future__ import annotations
-
 from typing import Protocol, TypedDict, Literal, Sequence
 
 
 class Message(TypedDict):
-    role: Literal["system", "user"]
+    role: Literal["system", "user", "assistant"]
     content: str
 
 

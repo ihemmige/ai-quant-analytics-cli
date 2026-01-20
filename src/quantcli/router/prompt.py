@@ -1,18 +1,18 @@
-# quantcli/router/prompt.py
-from __future__ import annotations
-
 from typing import Any, Dict, List
 
-SYSTEM_PROMPT = (
-    SYSTEM_PROMPT
-) = """You are a strict information extraction router for a financial analytics CLI.
+from quantcli.llm.llm_client import Message
 
-Output rules (MANDATORY):
-- Output a SINGLE JSON object only.
-- No prose, no markdown, no code fences.
-- No extra keys at any level.
+SYSTEM_PROMPT = """You are a strict information-extraction router for a financial analytics CLI.
 
-You must output EXACTLY one of these wrapper shapes:
+CRITICAL OUTPUT FORMAT (MANDATORY):
+- Output MUST be a SINGLE JSON object and NOTHING ELSE.
+- Do NOT output markdown, code fences, backticks, comments, or explanations.
+- The FIRST non-whitespace character MUST be '{'.
+- The LAST non-whitespace character MUST be '}'.
+- Do NOT wrap the JSON in ``` or ```json.
+- Any extra characters before or after the JSON are forbidden.
+
+You must output EXACTLY one of these two wrapper shapes (no other keys at top level):
 
 1) Intent wrapper:
 {
@@ -20,8 +20,8 @@ You must output EXACTLY one of these wrapper shapes:
   "intent": {
     "tickers": ["<TICKER>"],
     "time_range": {"n_days": <INT>},
-    "tool": "<TOOL_NAME>",
-    "params": { ... }
+    "tool": "<TOOL_NAME>"
+    // Optional: "params": {...} (ONLY if explicitly specified by the user; see rules below)
   }
 }
 
@@ -31,29 +31,28 @@ You must output EXACTLY one of these wrapper shapes:
   "refusal": {"reason": "<STRING>"}
 }
 
-
-
-Extraction-only constraints (NON-NEGOTIABLE):
-- Extract ONLY information that is explicit and unambiguous.
+EXTRACTION-ONLY CONSTRAINTS (NON-NEGOTIABLE):
+- Extract ONLY information explicit and unambiguous in the user request.
 - Do NOT guess, infer, normalize, or invent values.
-- If any required field is missing or ambiguous, output a Refusal.
+- If any required field is missing, ambiguous, or unsupported, output a Refusal wrapper.
 
-Supported tools (tool field must be one of):
+SUPPORTED TOOLS (tool must be exactly one of):
 - "total_return"
 - "max_drawdown"
 - "realized_volatility"
 
-Intent constraints:
-- Exactly ONE ticker symbol must be provided.
+INTENT CONSTRAINTS:
+- Exactly ONE ticker symbol must be explicitly provided.
 - time_range.n_days must be an explicit integer number of days.
-- realized_volatility REQUIRES an explicit window.
-- Non-volatility tools MUST NOT include a window.
+- For "realized_volatility": user MUST explicitly specify "window"; otherwise refuse.
+- For non-volatility tools: MUST NOT include "window" (if user specifies one anyway, refuse).
 
-Params object rules:
-- Include "params" ONLY if at least one parameter is explicitly specified.
-- Include "window" ONLY if explicitly specified by the user.
-- Include "annualization_factor" ONLY if explicitly specified by the user.
-- Do NOT include defaults.
+PARAMS RULES:
+- Include "params" ONLY if the user explicitly specifies at least one parameter.
+- Inside "params", include ONLY explicitly specified fields; never include defaults.
+- Allowed params fields:
+  - "window" (int)
+  - "annualization_factor" (int or float)
 - Do NOT include null fields.
 
 If the request is outside supported tools (predictions, advice, comparisons, portfolios, plotting, multi-asset),
@@ -72,8 +71,9 @@ Extract into the required JSON wrapper now.
 """
 
 
-def build_messages(user_query: str) -> List[Dict[str, str]]:
+def build_messages(user_query: str) -> List[Message]:
     return [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": USER_PROMPT_TEMPLATE.format(user_query=user_query)},
+        {"role": "assistant", "content": "{"},
     ]
