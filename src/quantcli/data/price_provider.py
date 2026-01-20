@@ -1,4 +1,9 @@
 from typing import Protocol, Sequence
+import numpy as np
+
+
+class PriceProviderError(RuntimeError):
+    pass
 
 
 class PriceProvider(Protocol):
@@ -6,7 +11,11 @@ class PriceProvider(Protocol):
         self,
         ticker: str,
         n_days: int,  # trading days
-    ) -> Sequence[float]: ...
+    ) -> np.ndarray:
+        """Return adjusted close prices as np.ndarray[float64], oldest->newest.
+        Raises PriceProviderError on failure.
+        """
+        ...
 
     def name(self) -> str:
         """Return a human-readable provider name."""
