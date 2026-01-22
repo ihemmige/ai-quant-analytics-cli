@@ -63,7 +63,10 @@ def test_route_query_llm_refusal():
 
 
 def test_route_query_malformed_llm_response():
-    user_text = "What is the realized volatility for AAPL over the last 30 days with a 20-day window?"
+    user_text = (
+        "What is the realized volatility for AAPL over the last 30 days "
+        "with a 20-day window?"
+    )
     llm_response = "not valid json"
     llm = FakeLLMClient(llm_response)
     refusal = route_query(user_text, llm)

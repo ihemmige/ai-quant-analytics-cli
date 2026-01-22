@@ -27,8 +27,10 @@ def validate_intent(intent: Intent) -> Intent | Refusal:
     # B. Range must support returns
     if intent.time_range.n_days < 2:
         return Refusal(
-            reason="Time range must include at least 2 trading days to compute returns.",
-            clarifying_question="Provide a time range with at least 2 trading days.",
+            reason=(
+                "Time range must include at least 2 trading days to compute returns."
+            ),
+            clarifying_question="Provide time range with at least 2 trading days.",
             allowed_capabilities=supported_tools(),
         )
 
@@ -38,22 +40,29 @@ def validate_intent(intent: Intent) -> Intent | Refusal:
         if intent.params.window is None:
             return Refusal(
                 reason="Realized volatility requires a window parameter.",
-                clarifying_question="Provide a window parameter for realized volatility.",
+                clarifying_question="Provide window parameter for realized volatility.",
                 allowed_capabilities=supported_tools(),
             )
         # window parameter must be less than the number of trading days in time range
         if intent.params.window >= intent.time_range.n_days:
             return Refusal(
-                reason="Window parameter must be less than the number of trading days in the time range.",
-                clarifying_question=f"Provide a window parameter less than {intent.time_range.n_days}.",
+                reason=(
+                    "Window parameter must be less than the number of trading days "
+                    "in the time range."
+                ),
+                clarifying_question=(
+                    f"Provide a window parameter less than {intent.time_range.n_days}."
+                ),
                 allowed_capabilities=supported_tools(),
             )
 
     # D. Window not allowed for other metrics
     if intent.tool != ToolName.realized_volatility and intent.params.window is not None:
+        tool_label = _tool_label(intent.tool)
+
         return Refusal(
-            reason=f"Window parameter is not applicable for {_tool_label(intent.tool)}.",
-            clarifying_question=f"Remove the window parameter for {_tool_label(intent.tool)}.",
+            reason=f"Window parameter is not applicable for {tool_label}.",
+            clarifying_question=f"Remove window parameter for {tool_label}.",
             allowed_capabilities=supported_tools(),
         )
 

@@ -90,7 +90,8 @@ def test_decode_not_json():
 @pytest.mark.parametrize(
     "raw",
     [
-        '[{"type": "intent", "intent": {"tickers": ["AAPL"], "time_range": {"n_days": 30}, "tool": "total_return"}}]',
+        '[{"type": "intent", "intent": {"tickers": ["AAPL"], '
+        '"time_range": {"n_days": 30}, "tool": "total_return"}}]',
         '"x"',
         "123",
     ],

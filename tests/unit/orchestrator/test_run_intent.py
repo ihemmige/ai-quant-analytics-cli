@@ -141,9 +141,9 @@ def test_result_metadata_complete():
 
 
 def test_all_registry_defined_tools_wired():
-    assert set(TOOL_REGISTRY.keys()).issubset(set(ToolName))
+    assert set(TOOL_REGISTRY).issubset(set(ToolName))
 
-    for tool in TOOL_REGISTRY.keys():
+    for tool in TOOL_REGISTRY:
         intent = Intent(
             tickers=["AAPL"],
             time_range=TimeRange(n_days=10),

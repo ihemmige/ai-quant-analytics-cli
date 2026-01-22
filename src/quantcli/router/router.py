@@ -40,4 +40,4 @@ def route_query(user_text: str, llm: LLMClient) -> Intent | Refusal:
     if isinstance(decoded_output, Intent):
         return decoded_output
 
-    assert False, "Unexpected output type from decode_llm_output"
+    raise AssertionError("Unexpected output type from decode_llm_output")

@@ -8,7 +8,7 @@ from quantcli.data.yfinance_price_provider import YFinancePriceProvider
 
 @pytest.fixture
 def patch_yfinance_history(monkeypatch):
-    """Patch yfinance.Ticker(...).history(...) to return a provided DataFrame (no network)."""
+    """Patch yfinance.Ticker(...).history(...) to return a provided DataFrame."""
 
     def _patch(df: pd.DataFrame) -> None:
         class FakeTicker:

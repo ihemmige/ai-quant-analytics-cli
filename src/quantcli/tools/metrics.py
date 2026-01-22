@@ -89,7 +89,8 @@ def realized_volatility(prices: np.ndarray, params: Params) -> float:
     # Need at least window+1 prices to compute window log returns
     if cleaned_prices.size < window + 1:
         raise ValueError(
-            f"At least {window + 1} price points are required to compute realized volatility with window={window}."
+            f"At least {window + 1} price points are required to compute realized "
+            f"volatility with window={window}."
         )
 
     log_returns = np.log(

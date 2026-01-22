@@ -16,7 +16,7 @@ class YFinancePriceProvider(PriceProvider):
         try:
             import yfinance as yf
 
-            # yfinance/Yahoo sometimes prints warnings/errors; never leak to CLI stdout/stderr
+            # yfinance/Yahoo prints warnings/errors; never leak to CLI stdout/stderr
             with (
                 contextlib.redirect_stdout(io.StringIO()),
                 contextlib.redirect_stderr(io.StringIO()),

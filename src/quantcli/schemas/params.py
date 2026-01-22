@@ -6,7 +6,8 @@ class Params(BaseModel):
         default=None,
         gt=0,
         le=5000,
-        description="Number of return observations to use for metrics that require a window (e.g. realized volatility).",
+        description="Number of return observations to use for metrics "
+        "that require a window (e.g. realized volatility).",
     )
 
     annualization_factor: int = Field(

@@ -28,7 +28,7 @@ class AnthropicLLMClient(LLMClient):
             and msgs[-1]["content"] == "{"
         )
 
-        # Anthropic Messages API: system is a top-level param; messages are user/assistant turns.
+        # Anthropic API: system is a top-level param; messages are user/assistant turns
         payload_messages = [{"role": m["role"], "content": m["content"]} for m in msgs]
         try:
             client = Anthropic(
@@ -44,7 +44,7 @@ class AnthropicLLMClient(LLMClient):
                 messages=payload_messages,
             )
 
-            # Deterministic extraction of model text content blocks (no JSON substring extraction, no trimming).
+            # extraction of model text content blocks
             raw = _extract_text(resp)
             return ("{" + raw) if used_prefill else raw
 
@@ -55,7 +55,7 @@ class AnthropicLLMClient(LLMClient):
         except (anthropic.APIConnectionError, anthropic.APITimeoutError) as e:
             raise LLMError(kind="unavailable", message="LLM unavailable.") from e
         except anthropic.APIStatusError as e:
-            # Other non-2xx (400, 404, 422, 500, 529, etc.)—treat as unavailable for MVP.
+            # Other non-2xx (400, 404, 422, 500, 529, etc.)—treat as unavailable.
             raise LLMError(kind="unavailable", message="LLM unavailable.") from e
         except anthropic.APIError as e:
             # Catch-all for Anthropic SDK errors
