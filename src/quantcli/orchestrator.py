@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from quantcli.data import PriceProvider, PriceProviderError
+from quantcli.data.price_provider import PriceProvider, PriceProviderError
 from quantcli.llm.llm_client import LLMClient
 from quantcli.router.router import route_query
 from quantcli.schemas import Intent, Refusal, Result, ToolName

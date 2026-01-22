@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections.abc import Callable
+from dataclasses import dataclass, field
 from typing import Literal
 
 import numpy as np
+from numpy.typing import NDArray
 
 from quantcli.data.price_provider import PriceProvider, PriceProviderError
 
@@ -15,6 +17,10 @@ class FakePriceProvider(PriceProvider):
     fixture: FixtureName = "monotonic_up"
     fail: bool = False
     calls: int = 0
+    _fixtures: dict[str, Callable[[str, int], NDArray[np.float64]]] = field(
+        init=False,
+        repr=False,
+    )
 
     def __post_init__(self) -> None:
         object.__setattr__(
@@ -31,7 +37,7 @@ class FakePriceProvider(PriceProvider):
     def name(self) -> str:
         return "FakePriceProvider"
 
-    def get_adjusted_close(self, ticker: str, n_days: int) -> np.ndarray:
+    def get_adjusted_close(self, ticker: str, n_days: int) -> NDArray[np.float64]:
         self.calls += 1
         if n_days < 0:
             raise ValueError("n_days must be >= 0")
@@ -40,11 +46,11 @@ class FakePriceProvider(PriceProvider):
         arr = self._fixtures[self.fixture](ticker, n_days)
         return np.array(arr, dtype=np.float64)
 
-    def _monotonic_up(self, ticker: str, n_days: int) -> np.ndarray:
+    def _monotonic_up(self, ticker: str, n_days: int) -> NDArray[np.float64]:
         base = 100.0
         return np.array([base + float(i) for i in range(n_days)], dtype=np.float64)
 
-    def _drawdown(self, ticker: str, n_days: int) -> np.ndarray:
+    def _drawdown(self, ticker: str, n_days: int) -> NDArray[np.float64]:
         if n_days == 0:
             return np.array([], dtype=np.float64)
         if n_days == 1:
@@ -66,8 +72,8 @@ class FakePriceProvider(PriceProvider):
             out.append(float(val))
         return np.array(out, dtype=np.float64)
 
-    def _short_2(self, ticker: str, n_days: int) -> np.ndarray:
+    def _short_2(self, ticker: str, n_days: int) -> NDArray[np.float64]:
         return np.array([100.0, 101.0], dtype=np.float64)
 
-    def _invalid_non_positive(self, ticker: str, n_days: int) -> np.ndarray:
+    def _invalid_non_positive(self, ticker: str, n_days: int) -> NDArray[np.float64]:
         return np.array([0.0 for _ in range(n_days)], dtype=np.float64)

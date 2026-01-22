@@ -37,6 +37,16 @@ warn_unused_ignores = true
 disallow_any_unimported = true
 disallow_any_expr = false
 check_untyped_defs = true
+ignore_missing_imports = true
 exclude = [
   "tests/",
+]
+
+[project.optional-dependencies]
+dev = [
+  "black",
+  "ruff",
+  "mypy",
+  "pytest",
+  "pandas-stubs",
 ]

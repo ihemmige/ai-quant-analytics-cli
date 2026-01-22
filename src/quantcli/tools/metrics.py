@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import numpy as np
+from numpy.typing import NDArray
 
 from quantcli.schemas import Params  # adjust import to your actual Params location
 
 
-def _clean_prices(prices: np.ndarray) -> np.ndarray:
+def _clean_prices(prices: NDArray[np.float64]) -> NDArray[np.float64]:
     """
     Enforce the numeric contract for metric kernels:
     - 1-D numpy array
@@ -26,7 +27,7 @@ def _clean_prices(prices: np.ndarray) -> np.ndarray:
     return prices
 
 
-def total_return(prices: np.ndarray, params: Params) -> float:
+def total_return(prices: NDArray[np.float64], params: Params) -> float:
     """
     Total return of a price series, where 0.1 corresponds to a 10% total return.
     """
@@ -46,7 +47,7 @@ def total_return(prices: np.ndarray, params: Params) -> float:
     return float((cleaned_prices[-1] - cleaned_prices[0]) / cleaned_prices[0])
 
 
-def max_drawdown(prices: np.ndarray, params: Params) -> float:
+def max_drawdown(prices: NDArray[np.float64], params: Params) -> float:
     """
     Maximum peak-to-trough drawdown of a price series, in [0, 1].
     """
@@ -68,7 +69,7 @@ def max_drawdown(prices: np.ndarray, params: Params) -> float:
     return float(np.max(drawdown))
 
 
-def realized_volatility(prices: np.ndarray, params: Params) -> float:
+def realized_volatility(prices: NDArray[np.float64], params: Params) -> float:
     """
     Annualized realized volatility computed as the sample std (ddof=1) of log returns
     over the specified window, scaled by sqrt(annualization_factor).

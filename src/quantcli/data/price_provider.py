@@ -1,6 +1,7 @@
 from typing import Protocol
 
 import numpy as np
+from numpy.typing import NDArray
 
 
 class PriceProviderError(RuntimeError):
@@ -12,7 +13,7 @@ class PriceProvider(Protocol):
         self,
         ticker: str,
         n_days: int,  # trading days
-    ) -> np.ndarray:
+    ) -> NDArray[np.float64]:
         """Return adjusted close prices as np.ndarray[float64], oldest->newest.
         Raises PriceProviderError on failure.
         """

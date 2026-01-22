@@ -3,7 +3,8 @@ from dataclasses import dataclass
 from typing import Any
 
 import anthropic
-from anthropic import Anthropic
+from anthropic import Anthropic, Omit, omit
+from anthropic.types import MessageParam
 
 from quantcli.llm.errors import LLMError
 from quantcli.llm.llm_client import LLMClient, Message
@@ -29,7 +30,10 @@ class AnthropicLLMClient(LLMClient):
         )
 
         # Anthropic API: system is a top-level param; messages are user/assistant turns
-        payload_messages = [{"role": m["role"], "content": m["content"]} for m in msgs]
+        payload_messages: list[MessageParam] = [
+            {"role": m["role"], "content": m["content"]} for m in msgs
+        ]
+
         try:
             client = Anthropic(
                 api_key=self.api_key,
@@ -65,23 +69,25 @@ class AnthropicLLMClient(LLMClient):
             raise LLMError(kind="unavailable", message="LLM unavailable.") from e
 
 
-def _split_messages(messages: Sequence[Message]) -> tuple[str | None, list[Message]]:
+def _split_messages(
+    messages: Sequence[Message],
+) -> tuple[str | Omit, list[MessageParam]]:
     system_parts: list[str] = []
-    msgs: list[Message] = []
+    msgs: list[MessageParam] = []
 
     for m in messages:
         role = m["role"]
         if role == "system":
             system_parts.append(m["content"])
         elif role == "user" or role == "assistant":
-            msgs.append(m)
+            msgs.append({"role": role, "content": m["content"]})
         else:
             # Protocol prevents this, but keep deterministic behavior.
             raise ValueError(f"Unsupported message role: {role}")
 
     if not msgs:
         raise ValueError("At least one user message is required.")
-    system_text = "\n\n".join(system_parts) if system_parts else None
+    system_text = "\n\n".join(system_parts) if system_parts else omit
     return system_text, msgs
 
 

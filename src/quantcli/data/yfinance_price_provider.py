@@ -4,6 +4,7 @@ import io
 
 import numpy as np
 import pandas as pd
+from numpy.typing import NDArray
 
 from quantcli.data.price_provider import PriceProvider, PriceProviderError
 
@@ -12,7 +13,7 @@ class YFinancePriceProvider(PriceProvider):
     def name(self) -> str:
         return "yfinance"
 
-    def get_adjusted_close(self, ticker: str, n_days: int) -> np.ndarray:
+    def get_adjusted_close(self, ticker: str, n_days: int) -> NDArray[np.float64]:
         try:
             import yfinance as yf
 

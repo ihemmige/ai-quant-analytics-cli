@@ -43,11 +43,7 @@ def cli(
 
     try:
         yfinance_provider = provider_factory()
-        out = run_query_fn(
-            user_query=query,
-            llm_client=llm_client,
-            price_provider=yfinance_provider,
-        )
+        out = run_query_fn(query, llm_client, yfinance_provider)
         print(out.model_dump_json())
         return 2 if isinstance(out, Refusal) else 0
     except Exception:
