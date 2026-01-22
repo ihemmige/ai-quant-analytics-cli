@@ -37,6 +37,8 @@ The following metrics are currently supported for single-asset analysis:
 - `realized_volatility`
 - `total_return`
 
+`n_days` refers to the number of price observations used in the calculation (minimum 2).
+
 ## Architecture
 ### Stage 1: Probabilistic Routing
 ```mermaid
