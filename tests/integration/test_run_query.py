@@ -1,9 +1,10 @@
-from quantcli.orchestrator import run_query
+import pytest
+
+from quantcli.data.fake_price_provider import FakePriceProvider
 from quantcli.llm.fake_llm_client import FakeLLMClient
+from quantcli.orchestrator import run_query
 from quantcli.schemas.refusal import Refusal
 from quantcli.schemas.tool_name import ToolName
-from quantcli.data.fake_price_provider import FakePriceProvider
-import pytest
 from quantcli.tools.registry import supported_tools
 
 

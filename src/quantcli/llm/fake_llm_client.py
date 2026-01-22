@@ -1,5 +1,6 @@
+from collections.abc import Sequence
+
 from quantcli.llm.llm_client import LLMClient, Message
-from typing import Sequence
 
 
 class FakeLLMClient(LLMClient):

@@ -1,4 +1,5 @@
-from typing import Protocol, TypedDict, Literal, Sequence
+from collections.abc import Sequence
+from typing import Literal, Protocol, TypedDict
 
 
 class Message(TypedDict):

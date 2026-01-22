@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+
 from quantcli.schemas.tool_name import ToolName
 
 

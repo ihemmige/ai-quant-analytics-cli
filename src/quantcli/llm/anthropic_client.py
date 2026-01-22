@@ -1,17 +1,18 @@
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence, Optional, Any
+from typing import Any
 
-from anthropic import Anthropic
 import anthropic
+from anthropic import Anthropic
 
-from quantcli.llm.llm_client import LLMClient, Message
 from quantcli.llm.errors import LLMError
+from quantcli.llm.llm_client import LLMClient, Message
 
 
 @dataclass(frozen=True)
 class AnthropicLLMClient(LLMClient):
     model: str = "claude-haiku-4-5"
-    api_key: Optional[str] = None
+    api_key: str | None = None
     max_tokens: int = 256
     timeout_s: float = 30.0
 
@@ -64,7 +65,7 @@ class AnthropicLLMClient(LLMClient):
             raise LLMError(kind="unavailable", message="LLM unavailable.") from e
 
 
-def _split_messages(messages: Sequence[Message]) -> tuple[Optional[str], list[Message]]:
+def _split_messages(messages: Sequence[Message]) -> tuple[str | None, list[Message]]:
     system_parts: list[str] = []
     msgs: list[Message] = []
 

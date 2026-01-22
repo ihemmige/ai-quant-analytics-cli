@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Literal
+
 import numpy as np
 
 from quantcli.data.price_provider import PriceProvider, PriceProviderError
-
 
 FixtureName = Literal["monotonic_up", "drawdown", "short_1", "invalid_non_positive"]
 
@@ -29,7 +29,7 @@ class FakePriceProvider(PriceProvider):
         )
 
     def name(self) -> str:
-        return f"FakePriceProvider"
+        return "FakePriceProvider"
 
     def get_adjusted_close(self, ticker: str, n_days: int) -> np.ndarray:
         self.calls += 1

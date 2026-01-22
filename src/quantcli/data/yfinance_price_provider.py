@@ -17,7 +17,10 @@ class YFinancePriceProvider(PriceProvider):
             import yfinance as yf
 
             # yfinance/Yahoo sometimes prints warnings/errors; never leak to CLI stdout/stderr
-            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            with (
+                contextlib.redirect_stdout(io.StringIO()),
+                contextlib.redirect_stderr(io.StringIO()),
+            ):
                 df = yf.Ticker(ticker).history(
                     period=f"{n_days}d",
                     auto_adjust=True,  # adjusted close

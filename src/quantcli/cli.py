@@ -1,15 +1,14 @@
 import argparse
-from typing import Sequence
+from collections.abc import Callable, Sequence
 
+from quantcli.data.price_provider import PriceProvider
 from quantcli.data.yfinance_price_provider import YFinancePriceProvider
+from quantcli.llm.llm_client import LLMClient
+from quantcli.orchestrator import run_query
+from quantcli.runtime import ConfigError, anthropic_client_from_env
 from quantcli.schemas.refusal import Refusal
 from quantcli.schemas.result import Result
-from quantcli.orchestrator import run_query
-from quantcli.runtime import anthropic_client_from_env, ConfigError
 from quantcli.tools.registry import supported_tools
-from quantcli.llm.llm_client import LLMClient
-from typing import Callable
-from quantcli.data.price_provider import PriceProvider
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -51,7 +50,7 @@ def cli(
         )
         print(out.model_dump_json())
         return 2 if isinstance(out, Refusal) else 0
-    except Exception as e:
+    except Exception:
         refusal = Refusal(
             reason="Unexpected internal error.",
             clarifying_question=None,

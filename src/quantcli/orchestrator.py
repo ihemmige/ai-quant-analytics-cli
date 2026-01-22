@@ -1,10 +1,11 @@
 from __future__ import annotations
-from quantcli.schemas import Intent, Result, Refusal, ToolName
+
 from quantcli.data import PriceProvider, PriceProviderError
-from quantcli.validate_intent import validate_intent
 from quantcli.llm.llm_client import LLMClient
 from quantcli.router.router import route_query
-from quantcli.tools.registry import supported_tools, get_metric
+from quantcli.schemas import Intent, Refusal, Result, ToolName
+from quantcli.tools.registry import get_metric, supported_tools
+from quantcli.validate_intent import validate_intent
 
 
 def run_intent(intent: Intent, provider: PriceProvider) -> Result | Refusal:
@@ -15,7 +16,7 @@ def run_intent(intent: Intent, provider: PriceProvider) -> Result | Refusal:
     metric_fn = get_metric(validated_intent.tool)
     if metric_fn is None:
         return Refusal(
-            reason=f"Requested tool is not supported.",
+            reason="Requested tool is not supported.",
             clarifying_question=None,
             allowed_capabilities=supported_tools(),
         )
@@ -27,7 +28,7 @@ def run_intent(intent: Intent, provider: PriceProvider) -> Result | Refusal:
         )
     except PriceProviderError:
         return Refusal(
-            reason=f"Unable to retrieve valid price data.",
+            reason="Unable to retrieve valid price data.",
             clarifying_question=None,
             allowed_capabilities=supported_tools(),
         )
@@ -36,7 +37,7 @@ def run_intent(intent: Intent, provider: PriceProvider) -> Result | Refusal:
         ret_value = metric_fn(prices, validated_intent.params)
     except ValueError:
         return Refusal(
-            reason=f"Unable to compute metric from available price data.",
+            reason="Unable to compute metric from available price data.",
             clarifying_question=None,
             allowed_capabilities=supported_tools(),
         )

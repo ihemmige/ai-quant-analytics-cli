@@ -1,9 +1,10 @@
+import pytest
+
 from quantcli.router.decode import decode_llm_output
 from quantcli.schemas.intent import Intent
-from quantcli.schemas.refusal import Refusal
 from quantcli.schemas.llm_refusal import LLMRefusal
+from quantcli.schemas.refusal import Refusal
 from quantcli.schemas.tool_name import ToolName
-import pytest
 from quantcli.tools.registry import supported_tools
 
 
@@ -24,7 +25,7 @@ def test_decode_valid_intent_no_params():
     assert intent.tickers == ["AAPL"]
     assert intent.time_range.n_days == 30
     assert intent.tool == ToolName.total_return
-    assert intent.params.window is None and intent.params.annualization_factor is 252
+    assert intent.params.window is None and intent.params.annualization_factor == 252
 
 
 def test_decode_valid_intent_with_params():

@@ -1,7 +1,8 @@
 from pydantic import BaseModel, Field
+
+from quantcli.schemas.params import Params
 from quantcli.schemas.time_range import TimeRange
 from quantcli.schemas.tool_name import ToolName
-from quantcli.schemas.params import Params
 
 
 class Intent(BaseModel):

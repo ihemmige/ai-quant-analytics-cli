@@ -1,7 +1,8 @@
-import pytest
 import numpy as np
-from quantcli.tools.metrics import total_return
+import pytest
+
 from quantcli.schemas.params import Params
+from quantcli.tools.metrics import total_return
 
 
 def test_total_return_basic():

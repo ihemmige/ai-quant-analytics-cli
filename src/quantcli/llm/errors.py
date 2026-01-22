@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from typing import Literal, Optional
-
+from typing import Literal
 
 LLMErrorKind = Literal["auth", "rate_limited", "unavailable"]
 

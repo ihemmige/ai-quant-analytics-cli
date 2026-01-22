@@ -1,7 +1,8 @@
-import pytest
 import numpy as np
-from quantcli.tools.metrics import max_drawdown
+import pytest
+
 from quantcli.schemas.params import Params
+from quantcli.tools.metrics import max_drawdown
 
 
 def test_max_drawdown_basic():

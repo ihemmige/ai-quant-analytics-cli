@@ -1,5 +1,3 @@
-from typing import Any, Dict, List
-
 from quantcli.llm.llm_client import Message
 
 SYSTEM_PROMPT = """You are a strict information-extraction router for a financial analytics CLI.
@@ -71,7 +69,7 @@ Extract into the required JSON wrapper now.
 """
 
 
-def build_messages(user_query: str) -> List[Message]:
+def build_messages(user_query: str) -> list[Message]:
     return [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": USER_PROMPT_TEMPLATE.format(user_query=user_query)},

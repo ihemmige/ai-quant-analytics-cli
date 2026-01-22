@@ -1,7 +1,8 @@
 import numpy as np
 import pytest
-from quantcli.tools.metrics import realized_volatility
+
 from quantcli.schemas.params import Params
+from quantcli.tools.metrics import realized_volatility
 
 
 def test_realized_volatility_uses_last_window_returns_and_annualizes():

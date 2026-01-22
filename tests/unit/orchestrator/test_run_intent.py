@@ -1,13 +1,14 @@
-from quantcli.schemas.intent import Intent
-from quantcli.schemas.result import Result
-from quantcli.schemas.refusal import Refusal
-from quantcli.schemas.tool_name import ToolName
-from quantcli.schemas.params import Params
-from quantcli.schemas.time_range import TimeRange
-from quantcli.orchestrator import run_intent
-from quantcli.data.fake_price_provider import FakePriceProvider
-from quantcli.tools.registry import TOOL_REGISTRY, supported_tools
 import pytest
+
+from quantcli.data.fake_price_provider import FakePriceProvider
+from quantcli.orchestrator import run_intent
+from quantcli.schemas.intent import Intent
+from quantcli.schemas.params import Params
+from quantcli.schemas.refusal import Refusal
+from quantcli.schemas.result import Result
+from quantcli.schemas.time_range import TimeRange
+from quantcli.schemas.tool_name import ToolName
+from quantcli.tools.registry import TOOL_REGISTRY, supported_tools
 
 
 def test_invalid_intent_skips_provider():
