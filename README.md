@@ -73,6 +73,22 @@ Once decoding completes, no LLM output is consulted again.
 - Strict boundary between probabilistic routing and deterministic execution
 - JSON-only stdout (third-party stdout/stderr suppressed)
 
+## Development
+### Setup
+```bash
+pip install -e .[dev]
+pip install pre-commit
+pre-commit install
+```
+
+### Checks
+```bash
+make lint      # ruff + black + mypy
+make test      # pytest
+```
+
+All checks are enforced automatically on git commit via pre-commit.
+
 ## Future Enhancements
 - Additional metrics (e.g. rolling returns, downside risk)
 - Deterministic multi-asset and portfolio analytics
