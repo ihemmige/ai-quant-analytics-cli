@@ -254,3 +254,86 @@ def test_refusal_schema_invalid():
     assert refusal.reason == "LLM_REFUSAL_SCHEMA_INVALID"
     assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        # Classic fenced JSON
+        """```json
+        {"type":"intent","intent":{"tickers":["AAPL"],"time_range":{"n_days":30},"tool":"total_return"}}
+        ```""",
+        # Fenced without language tag
+        """```
+        {"type":"intent","intent":{"tickers":["AAPL"],"time_range":{"n_days":30},"tool":"total_return"}}
+        ```""",
+    ],
+)
+def test_decode_rejects_markdown_code_fences(raw: str):
+    out = decode_llm_output(raw)
+    assert isinstance(out, Refusal)
+    assert out.reason == "LLM_OUTPUT_NOT_JSON"
+    assert out.allowed_capabilities == supported_tools()
+    assert out.clarifying_question is None
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        # Leading prose + JSON
+        """Sure — here's the JSON:
+        {"type":"intent","intent":{"tickers":["AAPL"],"time_range":{"n_days":30},"tool":"total_return"}}""",
+        # Trailing prose + JSON
+        """{"type":"intent","intent":{"tickers":["AAPL"],"time_range":{"n_days":30},"tool":"total_return"}}
+        Hope that helps!""",
+    ],
+)
+def test_decode_rejects_non_json_prefix_or_suffix(raw: str):
+    out = decode_llm_output(raw)
+    assert isinstance(out, Refusal)
+    assert out.reason == "LLM_OUTPUT_NOT_JSON"
+    assert out.allowed_capabilities == supported_tools()
+    assert out.clarifying_question is None
+
+
+def test_decode_rejects_multiple_json_objects_concatenated():
+    raw = """
+    {"type":"intent","intent":{"tickers":["AAPL"],"time_range":{"n_days":30},"tool":"total_return"}}
+    {"type":"refusal","refusal":{"reason":"AMBIGUOUS"}}
+    """
+    out = decode_llm_output(raw)
+    assert isinstance(out, Refusal)
+    assert out.reason == "LLM_OUTPUT_NOT_JSON"
+    assert out.allowed_capabilities == supported_tools()
+    assert out.clarifying_question is None
+
+
+def test_decode_intent_unknown_tool_string_is_schema_invalid():
+    raw = """
+    {
+        "type": "intent",
+        "intent": {
+            "tickers": ["AAPL"],
+            "time_range": {"n_days": 30},
+            "tool": "totally_not_a_tool"
+        }
+    }
+    """
+    out = decode_llm_output(raw)
+    assert isinstance(out, Refusal)
+    assert out.reason == "LLM_INTENT_SCHEMA_INVALID"
+    assert out.allowed_capabilities == supported_tools()
+    assert out.clarifying_question is None
+
+
+def test_decode_refuses_if_llm_outputs_list_even_if_first_element_is_valid():
+    raw = """
+    [
+        {"type":"intent","intent":{"tickers":["AAPL"],"time_range":{"n_days":30},"tool":"total_return"}}
+    ]
+    """
+    out = decode_llm_output(raw)
+    assert isinstance(out, Refusal)
+    assert out.reason == "LLM_OUTPUT_NOT_OBJECT"
+    assert out.allowed_capabilities == supported_tools()
+    assert out.clarifying_question is None
