@@ -16,5 +16,3 @@ class Result(BaseModel):
             "parameters used, etc."
         ),
     )
-
-    # TODO validation should ensure only one ticker for now

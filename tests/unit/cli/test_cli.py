@@ -1,26 +1,12 @@
 import json
 
 from quantcli.cli import cli
+from quantcli.data.fake_price_provider import FakePriceProvider
+from quantcli.llm.fake_llm_client import FakeLLMClient
 from quantcli.schemas.refusal import Refusal
 from quantcli.schemas.result import Result
 from quantcli.schemas.tool_name import ToolName
 from quantcli.tools.registry import supported_tools
-
-
-def fake_llm_factory():
-    class DummyLLM:
-        def complete(self, messages):
-            raise AssertionError("LLM should not be called in CLI unit tests")
-
-    return DummyLLM()
-
-
-def fake_provider_factory():
-    class DummyProvider:
-        def get_adjusted_close(self, *args, **kwargs):
-            raise AssertionError("Price provider must not be called in CLI unit tests")
-
-    return DummyProvider()
 
 
 def test_cli_result_exit_code_and_json(capsys):
@@ -34,8 +20,8 @@ def test_cli_result_exit_code_and_json(capsys):
 
     code = cli(
         ["total", "return", "AAPL", "10", "days"],
-        llm_factory=fake_llm_factory,
-        provider_factory=fake_provider_factory,
+        llm_factory=lambda: FakeLLMClient("valid response"),
+        provider_factory=FakePriceProvider,
         run_query_fn=fake_run_query,
     )
     out = capsys.readouterr().out.strip()
@@ -58,8 +44,8 @@ def test_cli_refusal_exit_code_and_json(capsys):
 
     code = cli(
         ["compare", "AAPL", "and", "MSFT"],
-        llm_factory=fake_llm_factory,
-        provider_factory=fake_provider_factory,
+        llm_factory=lambda: FakeLLMClient("valid response"),
+        provider_factory=FakePriceProvider,
         run_query_fn=fake_run_query,
     )
     out = capsys.readouterr().out.strip()
@@ -96,8 +82,8 @@ def test_cli_joins_query_tokens(capsys):
             "10",
             "days?",
         ],
-        llm_factory=fake_llm_factory,
-        provider_factory=fake_provider_factory,
+        llm_factory=lambda: FakeLLMClient("valid response"),
+        provider_factory=FakePriceProvider,
         run_query_fn=fake_run_query,
     )
     _ = capsys.readouterr()  # consume stdout; not asserted here

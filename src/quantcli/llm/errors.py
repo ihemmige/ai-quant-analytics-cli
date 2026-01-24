@@ -1,13 +1,13 @@
-from dataclasses import dataclass
 from typing import Literal
 
 LLMErrorKind = Literal["auth", "rate_limited", "unavailable"]
 
 
-@dataclass(frozen=True)
 class LLMError(Exception):
-    kind: LLMErrorKind
-    message: str
+    def __init__(self, kind: LLMErrorKind, message: str | None = None):
+        super().__init__(kind)
+        self.kind = kind
+        self.message = message  # internal only
 
     def __str__(self) -> str:
-        return f"LLMError(kind={self.kind}): {self.message}"
+        return f"LLMError(kind={self.kind})"

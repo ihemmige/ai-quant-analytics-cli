@@ -65,7 +65,7 @@ class AnthropicLLMClient(LLMClient):
             # Catch-all for Anthropic SDK errors
             raise LLMError(kind="unavailable", message="LLM unavailable.") from e
         except Exception as e:
-            # Hard boundary: never leak random exception types
+            # don't leak random exception types
             raise LLMError(kind="unavailable", message="LLM unavailable.") from e
 
 
