@@ -1,7 +1,9 @@
 from quantcli.llm.llm_client import LLMClient
 from quantcli.router.decode import decode_llm_output
 from quantcli.router.prompt import build_messages
-from quantcli.schemas import Intent, LLMRefusal, Refusal
+from quantcli.schemas.intent import Intent
+from quantcli.schemas.llm_refusal import LLMRefusal
+from quantcli.schemas.refusal import Refusal
 from quantcli.tools.registry import supported_tools
 
 

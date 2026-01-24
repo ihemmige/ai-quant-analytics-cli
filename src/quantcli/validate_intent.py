@@ -1,4 +1,6 @@
-from quantcli.schemas import Intent, Refusal, ToolName
+from quantcli.schemas.intent import Intent
+from quantcli.schemas.refusal import Refusal
+from quantcli.schemas.tool_name import ToolName
 from quantcli.tools.registry import supported_tools
 
 

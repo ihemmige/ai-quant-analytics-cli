@@ -71,7 +71,9 @@ def test_yfinance_provider_missing_close_column_raises(patch_yfinance_history, c
     _assert_no_output(capsys)
 
 
-def test_yfinance_provider_insufficient_points_lt_2_raises(patch_yfinance_history, capsys):
+def test_yfinance_provider_insufficient_points_lt_2_raises(
+    patch_yfinance_history, capsys
+):
     df = pd.DataFrame({"Close": [100.0]})
     patch_yfinance_history(df, noisy=True)
 
@@ -82,7 +84,9 @@ def test_yfinance_provider_insufficient_points_lt_2_raises(patch_yfinance_histor
     _assert_no_output(capsys)
 
 
-def test_yfinance_provider_nan_dropped_then_insufficient_points(patch_yfinance_history, capsys):
+def test_yfinance_provider_nan_dropped_then_insufficient_points(
+    patch_yfinance_history, capsys
+):
     # Provider coerces to numeric and drops NaNs; this becomes 1 point -> insufficient.
     df = pd.DataFrame({"Close": [100.0, np.nan]})
     patch_yfinance_history(df, noisy=True)

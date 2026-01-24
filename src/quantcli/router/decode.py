@@ -3,7 +3,9 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from quantcli.schemas import Intent, LLMRefusal, Refusal
+from quantcli.schemas.intent import Intent
+from quantcli.schemas.llm_refusal import LLMRefusal
+from quantcli.schemas.refusal import Refusal
 from quantcli.tools.registry import supported_tools
 
 

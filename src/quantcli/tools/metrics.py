@@ -3,10 +3,10 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 
-from quantcli.schemas import Params  # adjust import to your actual Params location
+from quantcli.schemas.params import Params
 
 
-def _clean_prices(prices: NDArray[np.float64]) -> NDArray[np.float64]:
+def _validate_prices(prices: NDArray[np.float64]) -> NDArray[np.float64]:
     """
     Enforce the numeric contract for metric kernels:
     - 1-D numpy array
@@ -31,41 +31,43 @@ def total_return(prices: NDArray[np.float64], params: Params) -> float:
     """
     Total return of a price series, where 0.1 corresponds to a 10% total return.
     """
-    cleaned_prices = _clean_prices(prices)
+
+    validated_prices = _validate_prices(prices)
 
     if params.window is not None:
         raise ValueError("Window is not supported for total_return.")
 
-    if cleaned_prices.size < 2:
+    if validated_prices.size < 2:
         raise ValueError(
             "At least two price points are required to compute total return."
         )
 
-    if np.any(cleaned_prices <= 0):
+    if np.any(validated_prices <= 0):
         raise ValueError("Prices must be strictly positive to compute total return.")
 
-    return float((cleaned_prices[-1] - cleaned_prices[0]) / cleaned_prices[0])
+    return float((validated_prices[-1] - validated_prices[0]) / validated_prices[0])
 
 
 def max_drawdown(prices: NDArray[np.float64], params: Params) -> float:
     """
     Maximum peak-to-trough drawdown of a price series, in [0, 1].
     """
-    cleaned_prices = _clean_prices(prices)
+
+    validated_prices = _validate_prices(prices)
 
     if params.window is not None:
         raise ValueError("Window is not supported for max_drawdown.")
 
-    if cleaned_prices.size < 2:
+    if validated_prices.size < 2:
         raise ValueError(
             "At least two price points are required to compute max drawdown."
         )
 
-    if np.any(cleaned_prices <= 0):
+    if np.any(validated_prices <= 0):
         raise ValueError("Prices must be strictly positive to compute drawdown.")
 
-    cumulative_max = np.maximum.accumulate(cleaned_prices)
-    drawdown = (cumulative_max - cleaned_prices) / cumulative_max
+    cumulative_max = np.maximum.accumulate(validated_prices)
+    drawdown = (cumulative_max - validated_prices) / cumulative_max
     return float(np.max(drawdown))
 
 
@@ -74,7 +76,8 @@ def realized_volatility(prices: NDArray[np.float64], params: Params) -> float:
     Annualized realized volatility computed as the sample std (ddof=1) of log returns
     over the specified window, scaled by sqrt(annualization_factor).
     """
-    cleaned_prices = _clean_prices(prices)
+
+    validated_prices = _validate_prices(prices)
 
     window = params.window
     if window is None:
@@ -84,19 +87,19 @@ def realized_volatility(prices: NDArray[np.float64], params: Params) -> float:
     if window < 2:
         raise ValueError("Window must be at least 2 to compute sample std (ddof=1).")
 
-    if np.any(cleaned_prices <= 0):
+    if np.any(validated_prices <= 0):
         raise ValueError("Prices must be strictly positive to compute log returns.")
 
     # Need at least window+1 prices to compute window log returns
-    if cleaned_prices.size < window + 1:
+    if validated_prices.size < window + 1:
         raise ValueError(
             f"At least {window + 1} price points are required to compute realized "
             f"volatility with window={window}."
         )
 
     log_returns = np.log(
-        cleaned_prices[1:] / cleaned_prices[:-1]
-    )  # length = cleaned_prices.size - 1
+        validated_prices[1:] / validated_prices[:-1]
+    )  # length = validated_prices.size - 1
     window_returns = log_returns[-window:]
 
     vol = float(np.std(window_returns, ddof=1))

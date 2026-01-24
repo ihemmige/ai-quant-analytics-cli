@@ -1,9 +1,10 @@
-from __future__ import annotations
-
 from quantcli.data.price_provider import PriceProvider, PriceProviderError
 from quantcli.llm.llm_client import LLMClient
 from quantcli.router.router import route_query
-from quantcli.schemas import Intent, Refusal, Result, ToolName
+from quantcli.schemas.intent import Intent
+from quantcli.schemas.refusal import Refusal
+from quantcli.schemas.result import Result
+from quantcli.schemas.tool_name import ToolName
 from quantcli.tools.registry import get_metric, supported_tools
 from quantcli.validate_intent import validate_intent
 
