@@ -24,7 +24,10 @@ def test_cli_result_exit_code_and_json(capsys):
         provider_factory=FakePriceProvider,
         run_query_fn=fake_run_query,
     )
-    out = capsys.readouterr().out.strip()
+
+    captured = capsys.readouterr()
+    out = captured.out.strip()
+    assert captured.err == ""
 
     assert code == 0
     parsed = json.loads(out)
@@ -48,7 +51,10 @@ def test_cli_refusal_exit_code_and_json(capsys):
         provider_factory=FakePriceProvider,
         run_query_fn=fake_run_query,
     )
-    out = capsys.readouterr().out.strip()
+
+    captured = capsys.readouterr()
+    out = captured.out.strip()
+    assert captured.err == ""
 
     assert code == 2
     parsed = json.loads(out)
@@ -86,6 +92,9 @@ def test_cli_joins_query_tokens(capsys):
         provider_factory=FakePriceProvider,
         run_query_fn=fake_run_query,
     )
-    _ = capsys.readouterr()  # consume stdout; not asserted here
+
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    _ = json.loads(captured.out.strip())
 
     assert seen["query"] == "What is max drawdown for AAPL over the past 10 days?"
