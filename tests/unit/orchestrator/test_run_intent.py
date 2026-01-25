@@ -11,7 +11,7 @@ from quantcli.schemas.tool_name import ToolName
 from quantcli.tools.registry import TOOL_REGISTRY, supported_tools
 
 
-def test_invalid_intent_skips_provider():
+def test_invalid_intent_skips_provider(cid):
     intent = Intent(
         tickers=["AAPL", "GOOG"],
         time_range=TimeRange(n_days=5),
@@ -19,7 +19,7 @@ def test_invalid_intent_skips_provider():
         params=Params(window=4, annualization_factor=252),
     )
     provider = FakePriceProvider()
-    result = run_intent(intent, provider)
+    result = run_intent(intent, provider, cid)
 
     assert isinstance(result, Refusal)
     assert provider.calls == 0
@@ -28,7 +28,7 @@ def test_invalid_intent_skips_provider():
     assert "Provide exactly one ticker symbol" in result.clarifying_question
 
 
-def test_total_return_ok():
+def test_total_return_ok(cid):
     intent = Intent(
         tickers=["AAPL"],
         time_range=TimeRange(n_days=10),
@@ -36,7 +36,7 @@ def test_total_return_ok():
         params=Params(window=None),
     )
     provider = FakePriceProvider()
-    result = run_intent(intent, provider)
+    result = run_intent(intent, provider, cid)
 
     assert isinstance(result, Result)
     assert result.tool == ToolName.total_return
@@ -52,7 +52,7 @@ def test_total_return_ok():
     assert provider.calls == 1
 
 
-def test_max_drawdown_ok():
+def test_max_drawdown_ok(cid):
     intent = Intent(
         tickers=["AAPL"],
         time_range=TimeRange(n_days=10),
@@ -60,7 +60,7 @@ def test_max_drawdown_ok():
         params=Params(window=None),
     )
     provider = FakePriceProvider("drawdown")
-    result = run_intent(intent, provider)
+    result = run_intent(intent, provider, cid)
 
     assert isinstance(result, Result)
     assert result.tool == ToolName.max_drawdown
@@ -78,7 +78,7 @@ def test_max_drawdown_ok():
     assert provider.calls == 1
 
 
-def test_realized_volatility_ok():
+def test_realized_volatility_ok(cid):
     intent = Intent(
         tickers=["AAPL"],
         time_range=TimeRange(n_days=10),
@@ -86,7 +86,7 @@ def test_realized_volatility_ok():
         params=Params(window=5, annualization_factor=252),
     )
     provider = FakePriceProvider("monotonic_up")
-    result = run_intent(intent, provider)
+    result = run_intent(intent, provider, cid)
 
     assert isinstance(result, Result)
     assert result.tool == ToolName.realized_volatility
@@ -104,7 +104,7 @@ def test_realized_volatility_ok():
     assert provider.calls == 1
 
 
-def test_provider_failure_returns_refusal():
+def test_provider_failure_returns_refusal(cid):
     intent = Intent(
         tickers=["AAPL"],
         time_range=TimeRange(n_days=10),
@@ -112,7 +112,7 @@ def test_provider_failure_returns_refusal():
         params=Params(window=None),
     )
     provider = FakePriceProvider(fail=True)
-    result = run_intent(intent, provider)
+    result = run_intent(intent, provider, cid)
 
     assert isinstance(result, Refusal)
     assert result.reason == "Unable to retrieve valid price data."
@@ -120,7 +120,7 @@ def test_provider_failure_returns_refusal():
     assert provider.calls == 1
 
 
-def test_result_metadata_complete():
+def test_result_metadata_complete(cid):
     intent = Intent(
         tickers=["AAPL"],
         time_range=TimeRange(n_days=10),
@@ -128,7 +128,7 @@ def test_result_metadata_complete():
         params=Params(window=7, annualization_factor=252),
     )
     provider = FakePriceProvider()
-    result = run_intent(intent, provider)
+    result = run_intent(intent, provider, cid)
 
     assert isinstance(result, Result)
     assert "range_n_days" in result.metadata
@@ -140,7 +140,7 @@ def test_result_metadata_complete():
     assert "interpretation_notes" in result.metadata
 
 
-def test_all_registry_defined_tools_wired():
+def test_all_registry_defined_tools_wired(cid):
     assert set(TOOL_REGISTRY).issubset(set(ToolName))
 
     for tool in TOOL_REGISTRY:
@@ -155,7 +155,7 @@ def test_all_registry_defined_tools_wired():
             ),
         )
         provider = FakePriceProvider()
-        result = run_intent(intent, provider)
+        result = run_intent(intent, provider, cid)
 
         assert isinstance(result, Result)
         assert result.tool == tool

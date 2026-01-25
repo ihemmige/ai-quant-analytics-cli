@@ -10,7 +10,7 @@ from quantcli.tools.registry import supported_tools
 
 
 def test_cli_result_exit_code_and_json(capsys):
-    def fake_run_query(user_query, llm_client, price_provider):
+    def fake_run_query(user_query, llm_client, price_provider, cid):
         return Result(
             tool=ToolName.total_return,
             tickers=["AAPL"],
@@ -38,7 +38,7 @@ def test_cli_result_exit_code_and_json(capsys):
 
 
 def test_cli_refusal_exit_code_and_json(capsys):
-    def fake_run_query(user_query, llm_client, price_provider):
+    def fake_run_query(user_query, llm_client, price_provider, cid):
         return Refusal(
             reason="Only single-asset metrics currently supported.",
             clarifying_question=None,
@@ -66,7 +66,7 @@ def test_cli_refusal_exit_code_and_json(capsys):
 def test_cli_joins_query_tokens(capsys):
     seen = {}
 
-    def fake_run_query(user_query, llm_client, price_provider):
+    def fake_run_query(user_query, llm_client, price_provider, cid):
         seen["query"] = user_query
         return Refusal(
             reason="x",

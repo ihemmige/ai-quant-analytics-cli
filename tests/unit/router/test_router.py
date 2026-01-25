@@ -10,10 +10,10 @@ from quantcli.schemas.tool_name import ToolName
 from quantcli.tools.registry import supported_tools
 
 
-def test_route_query_empty_input():
+def test_route_query_empty_input(cid):
     user_text = "   "
     llm = FakeLLMClient("")
-    refusal = route_query(user_text, llm)
+    refusal = route_query(user_text, llm, cid)
 
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "USER_QUERY_EMPTY"
@@ -22,7 +22,7 @@ def test_route_query_empty_input():
     assert len(llm.calls) == 0
 
 
-def test_route_query_valid_intent():
+def test_route_query_valid_intent(cid):
     user_text = "What is the max drawdown for AAPL over the last 30 days?"
     llm_response = """
     {
@@ -35,7 +35,7 @@ def test_route_query_valid_intent():
     }
     """
     llm = FakeLLMClient(llm_response)
-    intent = route_query(user_text, llm)
+    intent = route_query(user_text, llm, cid)
 
     assert isinstance(intent, Intent)
     assert intent.tickers == ["AAPL"]
@@ -46,7 +46,7 @@ def test_route_query_valid_intent():
     assert len(llm.calls) == 1
 
 
-def test_route_query_llm_refusal():
+def test_route_query_llm_refusal(cid):
     user_text = "What is the max drawdown for AAPL over some days?"
     llm_response = """
     {
@@ -57,7 +57,7 @@ def test_route_query_llm_refusal():
     }
     """
     llm = FakeLLMClient(llm_response)
-    refusal = route_query(user_text, llm)
+    refusal = route_query(user_text, llm, cid)
 
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "AMBIGUOUS"
@@ -66,14 +66,14 @@ def test_route_query_llm_refusal():
     assert len(llm.calls) == 1
 
 
-def test_route_query_malformed_llm_response():
+def test_route_query_malformed_llm_response(cid):
     user_text = (
         "What is the realized volatility for AAPL over the last 30 days "
         "with a 20-day window?"
     )
     llm_response = "not valid json"
     llm = FakeLLMClient(llm_response)
-    refusal = route_query(user_text, llm)
+    refusal = route_query(user_text, llm, cid)
 
     assert isinstance(refusal, Refusal)
     assert (
@@ -85,10 +85,10 @@ def test_route_query_malformed_llm_response():
     assert len(llm.calls) == 1
 
 
-def test_route_query_llm_exception():
+def test_route_query_llm_exception(cid):
     user_text = "What is the total return for AAPL over the last 30 days?"
     llm = FakeLLMClient(response=LLMError(kind="sdk_error", message="LLM client error"))
-    refusal = route_query(user_text, llm)
+    refusal = route_query(user_text, llm, cid)
 
     assert isinstance(refusal, Refusal)
     assert refusal.reason == "Unable to process this request right now."
@@ -97,7 +97,7 @@ def test_route_query_llm_exception():
     assert len(llm.calls) == 1
 
 
-def test_route_query_calls_llm_with_correct_prompts():
+def test_route_query_calls_llm_with_correct_prompts(cid):
     user_text = "What is the total return for AAPL over the last 30 days?"
     llm_response = """
     {
@@ -110,7 +110,7 @@ def test_route_query_calls_llm_with_correct_prompts():
     }
     """
     llm = FakeLLMClient(llm_response)
-    intent = route_query(user_text, llm)
+    intent = route_query(user_text, llm, cid)
 
     assert isinstance(intent, Intent)
     assert intent.tickers == ["AAPL"]
@@ -139,7 +139,7 @@ def patch_decode_llm_output(monkeypatch):
     list(INTERNAL_CODE_TO_USER_REASON.items()),
 )
 def test_route_query_maps_internal_router_codes(
-    patch_decode_llm_output, internal_reason, expected_user_reason
+    patch_decode_llm_output, internal_reason, expected_user_reason, cid
 ):
     llm = FakeLLMClient(
         '{"type":"intent","intent":{}}'
@@ -153,7 +153,7 @@ def test_route_query_maps_internal_router_codes(
         ),
     )
 
-    out = route_query("anything", llm)
+    out = route_query("anything", llm, cid)
 
     assert isinstance(out, Refusal)
     assert out.reason == expected_user_reason

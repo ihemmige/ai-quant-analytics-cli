@@ -8,7 +8,7 @@ from quantcli.schemas.tool_name import ToolName
 from quantcli.tools.registry import supported_tools
 
 
-def test_run_query_refusal_short_circuits():
+def test_run_query_refusal_short_circuits(cid):
     user_query = "What is the max drawdown for AAPL over some days?"
     llm_response = """
     {
@@ -21,7 +21,7 @@ def test_run_query_refusal_short_circuits():
     llm_client = FakeLLMClient(llm_response)
     price_provider = FakePriceProvider()
 
-    result = run_query(user_query, llm_client, price_provider)
+    result = run_query(user_query, llm_client, price_provider, cid)
 
     assert isinstance(result, Refusal)
     assert result.reason == "AMBIGUOUS"
@@ -31,13 +31,13 @@ def test_run_query_refusal_short_circuits():
     assert result.clarifying_question is None
 
 
-def test_run_query_malformed_llm_response():
+def test_run_query_malformed_llm_response(cid):
     user_query = "What is the max drawdown for AAPL over last 30 days?"
     llm_response = "not valid json"
     llm_client = FakeLLMClient(llm_response)
     price_provider = FakePriceProvider()
 
-    result = run_query(user_query, llm_client, price_provider)
+    result = run_query(user_query, llm_client, price_provider, cid)
 
     assert isinstance(result, Refusal)
     assert (
@@ -50,7 +50,7 @@ def test_run_query_malformed_llm_response():
     assert result.clarifying_question is None
 
 
-def test_run_query_happy_path_total_return():
+def test_run_query_happy_path_total_return(cid):
     user_query = "What is the total return for AAPL over last 10 days?"
     llm_response = """
     {
@@ -65,7 +65,7 @@ def test_run_query_happy_path_total_return():
     llm_client = FakeLLMClient(llm_response)
     price_provider = FakePriceProvider()
 
-    result = run_query(user_query, llm_client, price_provider)
+    result = run_query(user_query, llm_client, price_provider, cid)
 
     assert not isinstance(result, Refusal)
     assert result.tool == ToolName.total_return
@@ -82,7 +82,7 @@ def test_run_query_happy_path_total_return():
     assert price_provider.calls == 1
 
 
-def test_run_query_happy_path_max_drawdown():
+def test_run_query_happy_path_max_drawdown(cid):
     user_query = "What is the max drawdown for AAPL over last 10 days?"
     llm_response = """
     {
@@ -97,7 +97,7 @@ def test_run_query_happy_path_max_drawdown():
     llm_client = FakeLLMClient(llm_response)
     price_provider = FakePriceProvider("drawdown")
 
-    result = run_query(user_query, llm_client, price_provider)
+    result = run_query(user_query, llm_client, price_provider, cid)
 
     assert not isinstance(result, Refusal)
     assert result.tool == ToolName.max_drawdown
@@ -114,7 +114,7 @@ def test_run_query_happy_path_max_drawdown():
     assert price_provider.calls == 1
 
 
-def test_run_query_happy_path_realized_volatility():
+def test_run_query_happy_path_realized_volatility(cid):
     user_query = (
         "What is the realized volatility for AAPL over last 10 days with a window of 5?"
     )
@@ -134,7 +134,7 @@ def test_run_query_happy_path_realized_volatility():
     llm_client = FakeLLMClient(llm_response)
     price_provider = FakePriceProvider("monotonic_up")
 
-    result = run_query(user_query, llm_client, price_provider)
+    result = run_query(user_query, llm_client, price_provider, cid)
 
     assert not isinstance(result, Refusal)
     assert result.tool == ToolName.realized_volatility
@@ -151,7 +151,7 @@ def test_run_query_happy_path_realized_volatility():
     assert price_provider.calls == 1
 
 
-def test_run_query_intent_fails_validation():
+def test_run_query_intent_fails_validation(cid):
     user_query = (
         "What is the max drawdown for AAPL over last 10 days with a window of 5?"
     )
@@ -171,7 +171,7 @@ def test_run_query_intent_fails_validation():
     llm_client = FakeLLMClient(llm_response)
     price_provider = FakePriceProvider()
 
-    result = run_query(user_query, llm_client, price_provider)
+    result = run_query(user_query, llm_client, price_provider, cid)
 
     assert isinstance(result, Refusal)
     assert (
