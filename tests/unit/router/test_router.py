@@ -1,4 +1,7 @@
+import pytest
+
 from quantcli.llm.fake_llm_client import FakeLLMClient
+from quantcli.refusals import INTERNAL_CODE_TO_USER_REASON
 from quantcli.router.router import route_query
 from quantcli.schemas.intent import Intent
 from quantcli.schemas.refusal import Refusal
@@ -72,7 +75,10 @@ def test_route_query_malformed_llm_response():
     refusal = route_query(user_text, llm)
 
     assert isinstance(refusal, Refusal)
-    assert refusal.reason == "LLM_OUTPUT_NOT_JSON"
+    assert (
+        refusal.reason == "Model output could not be parsed. "
+        "Please try running the command again or rephrasing your request."
+    )
     assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
     assert len(llm.calls) == 1
@@ -84,7 +90,7 @@ def test_route_query_llm_exception():
     refusal = route_query(user_text, llm)
 
     assert isinstance(refusal, Refusal)
-    assert refusal.reason == "LLM_CLIENT_ERROR"
+    assert refusal.reason == "Unable to process this request right now."
     assert refusal.allowed_capabilities == supported_tools()
     assert refusal.clarifying_question is None
     assert len(llm.calls) == 1
@@ -115,3 +121,41 @@ def test_route_query_calls_llm_with_correct_prompts():
     assert len(llm.calls) == 1
     assert llm.calls[0][0]["role"] == "system"
     assert llm.calls[0][1]["role"] == "user"
+
+
+@pytest.fixture
+def patch_decode_llm_output(monkeypatch):
+    def _patch(value):
+        monkeypatch.setattr(
+            "quantcli.router.router.decode_llm_output", lambda _raw: value
+        )
+
+    return _patch
+
+
+@pytest.mark.parametrize(
+    "internal_reason,expected_user_reason",
+    list(INTERNAL_CODE_TO_USER_REASON.items()),
+)
+def test_route_query_maps_internal_router_codes(
+    patch_decode_llm_output, internal_reason, expected_user_reason
+):
+    llm = FakeLLMClient(
+        '{"type":"intent","intent":{}}'
+    )  # raw doesn't matter; decode is patched
+
+    patch_decode_llm_output(
+        Refusal(
+            reason=internal_reason,
+            clarifying_question=None,
+            allowed_capabilities=supported_tools(),
+        ),
+    )
+
+    out = route_query("anything", llm)
+
+    assert isinstance(out, Refusal)
+    assert out.reason == expected_user_reason
+    assert out.allowed_capabilities == supported_tools()
+    assert out.clarifying_question is None
+    assert len(llm.calls) == 1

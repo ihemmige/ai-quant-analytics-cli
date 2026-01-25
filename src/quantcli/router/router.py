@@ -1,5 +1,6 @@
+from quantcli.llm.errors import LLMError
 from quantcli.llm.llm_client import LLMClient
-from quantcli.refusals import make_refusal
+from quantcli.refusals import INTERNAL_CODE_TO_USER_REASON, make_refusal
 from quantcli.router.decode import decode_llm_output
 from quantcli.router.prompt import build_messages
 from quantcli.schemas.intent import Intent
@@ -18,9 +19,14 @@ def route_query(user_text: str, llm: LLMClient) -> Intent | Refusal:
 
     try:
         llm_output = llm.complete(llm_prompts)
+    # differentiate errors for logging
+    except LLMError:
+        return make_refusal(
+            reason="Unable to process this request right now.",
+        )
     except Exception:
         return make_refusal(
-            reason="LLM_CLIENT_ERROR",
+            reason="Unable to process this request right now.",
         )
 
     decoded_output = decode_llm_output(llm_output)
@@ -31,6 +37,12 @@ def route_query(user_text: str, llm: LLMClient) -> Intent | Refusal:
         )
 
     if isinstance(decoded_output, Refusal):
+        mapped = INTERNAL_CODE_TO_USER_REASON.get(decoded_output.reason)
+        if mapped is not None:
+            return make_refusal(
+                reason=mapped,
+                clarifying_question=decoded_output.clarifying_question,
+            )
         return decoded_output
 
     if isinstance(decoded_output, Intent):

@@ -40,7 +40,10 @@ def test_run_query_malformed_llm_response():
     result = run_query(user_query, llm_client, price_provider)
 
     assert isinstance(result, Refusal)
-    assert result.reason == "LLM_OUTPUT_NOT_JSON"
+    assert (
+        result.reason == "Model output could not be parsed. "
+        "Please try running the command again or rephrasing your request."
+    )
     assert len(llm_client.calls) == 1
     assert price_provider.calls == 0
     assert result.allowed_capabilities == supported_tools()
