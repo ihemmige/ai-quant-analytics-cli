@@ -56,17 +56,16 @@ class AnthropicLLMClient(LLMClient):
             raise LLMError(kind="rate_limited", message="LLM rate limited.") from e
         except (anthropic.AuthenticationError, anthropic.PermissionDeniedError) as e:
             raise LLMError(kind="auth", message="LLM authentication failed.") from e
-        except (anthropic.APIConnectionError, anthropic.APITimeoutError) as e:
-            raise LLMError(kind="unavailable", message="LLM unavailable.") from e
-        except anthropic.APIStatusError as e:
-            # Other non-2xx (400, 404, 422, 500, 529, etc.)—treat as unavailable.
-            raise LLMError(kind="unavailable", message="LLM unavailable.") from e
-        except anthropic.APIError as e:
-            # Catch-all for Anthropic SDK errors
-            raise LLMError(kind="unavailable", message="LLM unavailable.") from e
+        except anthropic.APITimeoutError as e:
+            raise LLMError(kind="timeout", message="LLM timeout.") from e
+        except (
+            anthropic.APIConnectionError,
+            anthropic.APIStatusError,
+            anthropic.APIError,
+        ) as e:
+            raise LLMError(kind="sdk_error", message="LLM SDK error.") from e
         except Exception as e:
-            # don't leak random exception types
-            raise LLMError(kind="unavailable", message="LLM unavailable.") from e
+            raise LLMError(kind="sdk_error", message="LLM SDK error.") from e
 
 
 def _split_messages(

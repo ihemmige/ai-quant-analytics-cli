@@ -19,15 +19,8 @@ def route_query(user_text: str, llm: LLMClient) -> Intent | Refusal:
 
     try:
         llm_output = llm.complete(llm_prompts)
-    # differentiate errors for logging
     except LLMError:
-        return make_refusal(
-            reason="Unable to process this request right now.",
-        )
-    except Exception:
-        return make_refusal(
-            reason="Unable to process this request right now.",
-        )
+        return make_refusal(reason="Unable to process this request right now.")
 
     decoded_output = decode_llm_output(llm_output)
 

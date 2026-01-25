@@ -1,6 +1,6 @@
 from typing import Literal
 
-LLMErrorKind = Literal["auth", "rate_limited", "unavailable"]
+LLMErrorKind = Literal["auth", "rate_limited", "timeout", "sdk_error"]
 
 
 class LLMError(Exception):
