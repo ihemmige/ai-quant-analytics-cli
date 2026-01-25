@@ -1,11 +1,12 @@
 from quantcli.data.price_provider import PriceProvider, PriceProviderError
 from quantcli.llm.llm_client import LLMClient
+from quantcli.refusals import make_refusal
 from quantcli.router.router import route_query
 from quantcli.schemas.intent import Intent
 from quantcli.schemas.refusal import Refusal
 from quantcli.schemas.result import Result
 from quantcli.schemas.tool_name import ToolName
-from quantcli.tools.registry import get_metric, supported_tools
+from quantcli.tools.registry import get_metric
 from quantcli.validate_intent import validate_intent
 
 
@@ -16,11 +17,7 @@ def run_intent(intent: Intent, provider: PriceProvider) -> Result | Refusal:
 
     metric_fn = get_metric(validated_intent.tool)
     if metric_fn is None:
-        return Refusal(
-            reason="Requested tool is not supported.",
-            clarifying_question=None,
-            allowed_capabilities=supported_tools(),
-        )
+        return make_refusal(reason="Requested tool is not supported.")
 
     try:
         prices = provider.get_adjusted_close(
@@ -28,20 +25,12 @@ def run_intent(intent: Intent, provider: PriceProvider) -> Result | Refusal:
             n_days=validated_intent.time_range.n_days,
         )
     except PriceProviderError:
-        return Refusal(
-            reason="Unable to retrieve valid price data.",
-            clarifying_question=None,
-            allowed_capabilities=supported_tools(),
-        )
+        return make_refusal(reason="Unable to retrieve valid price data.")
 
     try:
         ret_value = metric_fn(prices, validated_intent.params)
     except ValueError:
-        return Refusal(
-            reason="Unable to compute metric from available price data.",
-            clarifying_question=None,
-            allowed_capabilities=supported_tools(),
-        )
+        return make_refusal(reason="Unable to compute metric.")
 
     annualization = (
         validated_intent.params.annualization_factor

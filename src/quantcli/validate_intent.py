@@ -1,7 +1,7 @@
+from quantcli.refusals import make_refusal
 from quantcli.schemas.intent import Intent
 from quantcli.schemas.refusal import Refusal
 from quantcli.schemas.tool_name import ToolName
-from quantcli.tools.registry import supported_tools
 
 
 def validate_intent(intent: Intent) -> Intent | Refusal:
@@ -20,34 +20,29 @@ def validate_intent(intent: Intent) -> Intent | Refusal:
     """
     # A. Single-asset only
     if len(intent.tickers) != 1:
-        return Refusal(
+        return make_refusal(
             reason="Only single-asset metrics currently supported.",
             clarifying_question="Provide exactly one ticker symbol.",
-            allowed_capabilities=supported_tools(),
         )
 
     # B. Range must support returns
     if intent.time_range.n_days < 2:
-        return Refusal(
-            reason=(
-                "Time range must include at least 2 trading days to compute returns."
-            ),
+        return make_refusal(
+            reason="Time range must include at least 2 trading days.",
             clarifying_question="Provide time range with at least 2 trading days.",
-            allowed_capabilities=supported_tools(),
         )
 
     # C + E. Realized volatility rules
     if intent.tool == ToolName.realized_volatility:
         # window parameter is required for realized volatility
         if intent.params.window is None:
-            return Refusal(
+            return make_refusal(
                 reason="Realized volatility requires a window parameter.",
                 clarifying_question="Provide window parameter for realized volatility.",
-                allowed_capabilities=supported_tools(),
             )
         # window parameter must be less than the number of trading days in time range
         if intent.params.window >= intent.time_range.n_days:
-            return Refusal(
+            return make_refusal(
                 reason=(
                     "Window parameter must be less than the number of trading days "
                     "in the time range."
@@ -55,17 +50,15 @@ def validate_intent(intent: Intent) -> Intent | Refusal:
                 clarifying_question=(
                     f"Provide a window parameter less than {intent.time_range.n_days}."
                 ),
-                allowed_capabilities=supported_tools(),
             )
 
     # D. Window not allowed for other metrics
     if intent.tool != ToolName.realized_volatility and intent.params.window is not None:
         tool_label = _tool_label(intent.tool)
 
-        return Refusal(
+        return make_refusal(
             reason=f"Window parameter is not applicable for {tool_label}.",
             clarifying_question=f"Remove window parameter for {tool_label}.",
-            allowed_capabilities=supported_tools(),
         )
 
     return intent

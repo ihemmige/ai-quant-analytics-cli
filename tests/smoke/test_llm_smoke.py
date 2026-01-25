@@ -35,7 +35,7 @@ pytestmark = [
 def test_llm_network_smoke_no_crash_and_decodes() -> None:
     user_query = "total return AAPL 10 days"
 
-    llm_client = AnthropicLLMClient(os.getenv("ANTHROPIC_API_KEY"))
+    llm_client = AnthropicLLMClient(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
     result = route_query(user_query, llm_client)
 

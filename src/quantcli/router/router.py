@@ -1,19 +1,17 @@
 from quantcli.llm.llm_client import LLMClient
+from quantcli.refusals import make_refusal
 from quantcli.router.decode import decode_llm_output
 from quantcli.router.prompt import build_messages
 from quantcli.schemas.intent import Intent
 from quantcli.schemas.llm_refusal import LLMRefusal
 from quantcli.schemas.refusal import Refusal
-from quantcli.tools.registry import supported_tools
 
 
 def route_query(user_text: str, llm: LLMClient) -> Intent | Refusal:
     user_text = user_text.strip()
     if user_text == "":
-        return Refusal(
+        return make_refusal(
             reason="USER_QUERY_EMPTY",
-            allowed_capabilities=supported_tools(),
-            clarifying_question=None,
         )
 
     llm_prompts = build_messages(user_text)
@@ -21,19 +19,15 @@ def route_query(user_text: str, llm: LLMClient) -> Intent | Refusal:
     try:
         llm_output = llm.complete(llm_prompts)
     except Exception:
-        return Refusal(
+        return make_refusal(
             reason="LLM_CLIENT_ERROR",
-            allowed_capabilities=supported_tools(),
-            clarifying_question=None,
         )
 
     decoded_output = decode_llm_output(llm_output)
 
     if isinstance(decoded_output, LLMRefusal):
-        return Refusal(
+        return make_refusal(
             reason=decoded_output.reason,
-            allowed_capabilities=supported_tools(),
-            clarifying_question=None,
         )
 
     if isinstance(decoded_output, Refusal):
