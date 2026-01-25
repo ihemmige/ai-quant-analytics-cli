@@ -1,5 +1,6 @@
 import pytest
 
+from quantcli.llm.errors import LLMError
 from quantcli.llm.fake_llm_client import FakeLLMClient
 from quantcli.refusals import INTERNAL_CODE_TO_USER_REASON
 from quantcli.router.router import route_query
@@ -86,7 +87,7 @@ def test_route_query_malformed_llm_response():
 
 def test_route_query_llm_exception():
     user_text = "What is the total return for AAPL over the last 30 days?"
-    llm = FakeLLMClient(response=RuntimeError("LLM client error"))
+    llm = FakeLLMClient(response=LLMError(kind="sdk_error", message="LLM client error"))
     refusal = route_query(user_text, llm)
 
     assert isinstance(refusal, Refusal)
