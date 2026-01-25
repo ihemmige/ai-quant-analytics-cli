@@ -4,13 +4,12 @@ from collections.abc import Callable, Sequence
 from quantcli.data.price_provider import PriceProvider
 from quantcli.data.yfinance_price_provider import YFinancePriceProvider
 from quantcli.llm.llm_client import LLMClient
+from quantcli.observability.debug import log_event, new_correlation_id
 from quantcli.orchestrator import run_query
 from quantcli.refusals import make_refusal
 from quantcli.runtime import ConfigError, anthropic_client_from_env
 from quantcli.schemas.refusal import Refusal
 from quantcli.schemas.result import Result
-
-from quantcli.observability.debug import new_correlation_id, log_event
 
 
 def _build_parser() -> argparse.ArgumentParser:

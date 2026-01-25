@@ -1,5 +1,6 @@
 from quantcli.data.price_provider import PriceProvider, PriceProviderError
 from quantcli.llm.llm_client import LLMClient
+from quantcli.observability.debug import log_event
 from quantcli.refusals import make_refusal
 from quantcli.router.router import route_query
 from quantcli.schemas.intent import Intent
@@ -8,7 +9,6 @@ from quantcli.schemas.result import Result
 from quantcli.schemas.tool_name import ToolName
 from quantcli.tools.registry import get_metric
 from quantcli.validate_intent import validate_intent
-from quantcli.observability.debug import log_event
 
 
 def run_intent(intent: Intent, provider: PriceProvider, cid: str) -> Result | Refusal:

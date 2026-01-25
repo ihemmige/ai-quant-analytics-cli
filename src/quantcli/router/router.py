@@ -1,13 +1,14 @@
+import time
+
 from quantcli.llm.errors import LLMError
 from quantcli.llm.llm_client import LLMClient
+from quantcli.observability.debug import log_event
 from quantcli.refusals import INTERNAL_CODE_TO_USER_REASON, make_refusal
 from quantcli.router.decode import decode_llm_output
 from quantcli.router.prompt import build_messages
 from quantcli.schemas.intent import Intent
 from quantcli.schemas.llm_refusal import LLMRefusal
 from quantcli.schemas.refusal import Refusal
-from quantcli.observability.debug import log_event
-import time
 
 
 def route_query(user_text: str, llm: LLMClient, cid: str) -> Intent | Refusal:
