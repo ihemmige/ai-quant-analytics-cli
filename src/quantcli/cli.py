@@ -4,7 +4,11 @@ from collections.abc import Callable, Sequence
 from quantcli.data.price_provider import PriceProvider
 from quantcli.data.yfinance_price_provider import YFinancePriceProvider
 from quantcli.llm.llm_client import LLMClient
-from quantcli.observability.debug import log_event, new_correlation_id
+from quantcli.observability.debug import (
+    init_logging_from_env,
+    log_event,
+    new_correlation_id,
+)
 from quantcli.orchestrator import run_query
 from quantcli.refusals import make_refusal
 from quantcli.runtime import ConfigError, anthropic_client_from_env
@@ -27,6 +31,8 @@ def cli(
         [str, LLMClient, PriceProvider, str], Result | Refusal
     ] = run_query,
 ) -> int:
+    init_logging_from_env()
+
     parser = _build_parser()
     args = parser.parse_args(argv)
     query = " ".join(args.query)

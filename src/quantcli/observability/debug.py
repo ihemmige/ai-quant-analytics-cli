@@ -13,7 +13,6 @@ DEBUG_PATH_ENV = "QUANTCLI_DEBUG_PATH"
 
 
 def _utc_ts() -> str:
-    # ISO8601 with milliseconds and Z suffix
     return datetime.now(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
 
@@ -42,8 +41,8 @@ class DebugLogger:
     - Never raises (fails closed)
     """
 
-    def __init__(self, config: DebugConfig | None = None) -> None:
-        self._config = config or _read_config()
+    def __init__(self, config: DebugConfig) -> None:
+        self._config = config
         self._lock = threading.Lock()
         self._fh: TextIO | None = None
 
@@ -54,14 +53,17 @@ class DebugLogger:
         if self._config.path:
             try:
                 # line-buffered text mode
-                self._fh = open(self._config.path, "a", buffering=1, encoding="utf-8")
-                atexit.register(self._safe_close)
+                # Intentionally not using context manager: long-lived file handle
+                self._fh = open(  # noqa: SIM115
+                    self._config.path, "a", buffering=1, encoding="utf-8"
+                )
+                atexit.register(self.close)
             except Exception:
                 # Fail closed: disable logging if file can't be opened
                 self._fh = None
                 self._config = DebugConfig(enabled=False, path=None)
 
-    def _safe_close(self) -> None:
+    def close(self) -> None:
         try:
             if self._fh is not None:
                 self._fh.close()
@@ -69,19 +71,13 @@ class DebugLogger:
             pass
 
     def _sink(self) -> TextIO:
-        # Never stdout.
         return self._fh if self._fh is not None else sys.stderr
 
     def log_event(self, event: str, cid: str, **fields: Any) -> None:
         if not self._config.enabled:
             return
 
-        record: dict[str, Any] = {
-            "ts": _utc_ts(),
-            "event": event,
-            "cid": cid,
-            **fields,
-        }
+        record: dict[str, Any] = {"ts": _utc_ts(), "event": event, "cid": cid, **fields}
 
         try:
             line = json.dumps(record, separators=(",", ":"), default=str)
@@ -91,11 +87,31 @@ class DebugLogger:
             pass
 
 
-LOGGER = DebugLogger()
+# Lazily initialized logger singleton
+_LOGGER: DebugLogger | None = None
+_LOGGER_CFG: DebugConfig | None = None
+
+
+def init_logging_from_env() -> None:
+    """
+    Initialize the debug logger from current environment.
+    """
+    global _LOGGER, _LOGGER_CFG
+    cfg = _read_config()
+
+    # if already initialized with same config, do nothing
+    if _LOGGER is not None and cfg == _LOGGER_CFG:
+        return
+
+    # config changed, close old file handle
+    if _LOGGER is not None:
+        _LOGGER.close()
+
+    _LOGGER = DebugLogger(cfg)
+    _LOGGER_CFG = cfg
 
 
 def log_event(event: str, cid: str, **fields: Any) -> None:
-    """
-    Convenience wrapper around the singleton.
-    """
-    LOGGER.log_event(event, cid, **fields)
+    if _LOGGER is None:
+        return
+    _LOGGER.log_event(event, cid, **fields)
