@@ -5,10 +5,10 @@ from quantcli.data.price_provider import PriceProvider
 from quantcli.data.yfinance_price_provider import YFinancePriceProvider
 from quantcli.llm.llm_client import LLMClient
 from quantcli.orchestrator import run_query
+from quantcli.refusals import make_refusal
 from quantcli.runtime import ConfigError, anthropic_client_from_env
 from quantcli.schemas.refusal import Refusal
 from quantcli.schemas.result import Result
-from quantcli.tools.registry import supported_tools
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -33,10 +33,9 @@ def cli(
     try:
         llm_client = llm_factory()
     except ConfigError as e:
-        refusal = Refusal(
+        refusal = make_refusal(
             reason=str(e),
             clarifying_question="Set ANTHROPIC_API_KEY.",
-            allowed_capabilities=supported_tools(),
         )
         print(refusal.model_dump_json())
         return 2
@@ -47,10 +46,9 @@ def cli(
         print(out.model_dump_json())
         return 2 if isinstance(out, Refusal) else 0
     except Exception:
-        refusal = Refusal(
+        refusal = make_refusal(
             reason="Unexpected internal error.",
             clarifying_question=None,
-            allowed_capabilities=supported_tools(),
         )
         print(refusal.model_dump_json())
         return 2
