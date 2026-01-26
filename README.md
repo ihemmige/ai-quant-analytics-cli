@@ -7,6 +7,8 @@ A guardrail-first CLI for financial analytics, using an LLM for intent parsing a
 - Deterministic, unit-tested financial metrics (no AI in computation)
 - Validation-first execution with explicit failure modes (`Result` or `Refusal`)
 - JSON-only output with exit codes (automation-safe)
+- Internal observability without leaking internals
+
 
 ## Install & Run
 ```bash
@@ -66,6 +68,29 @@ flowchart LR
   M --> Rs["Result"]
 ```
 Once decoding completes, no LLM output is consulted again.
+
+## Observability & Debug Logging
+
+QuantCLI provides **internal structured debug logging**, designed to preserve strict CLI output guarantees.
+
+### Properties
+- Off by default; enabled via `QUANTCLI_DEBUG=1`
+- Logs are emitted as JSONL (one event per line)
+- Logs are written to `stderr` or an optional file (never to `stdout`)
+- No prompt text, user input, or raw LLM output is logged
+
+### Enable debug logging (stderr)
+```bash
+export QUANTCLI_DEBUG=1
+quantcli "max drawdown AAPL last 10 days"
+```
+
+### Log to a file instead of stderr
+```bash
+export QUANTCLI_DEBUG=1
+export QUANTCLI_DEBUG_PATH=/tmp/quantcli.debug.log
+quantcli "max drawdown AAPL last 10 days"
+```
 
 ## Guarantees
 - No guessing, retries, or JSON repair from LLM
