@@ -11,8 +11,10 @@ def validate_intent(intent: Intent) -> Intent | Refusal:
     A. Exactly one ticker must be provided (single-asset only).
     B. Time range must include at least 2 trading days.
     C. Realized volatility requires a window parameter.
-    D. Window is not allowed for non-volatility metrics.
-    E. For realized volatility, window must be strictly less than n_days.
+    D. For realized volatility, window must be strictly less than n_days.
+    E. Sharpe ratio requires a window parameter.
+    F. For Sharpe ratio, window must be strictly less than n_days.
+    G. Window is not allowed for non-volatility metrics.
 
     Returns:
         - Intent if valid and executable
@@ -32,7 +34,7 @@ def validate_intent(intent: Intent) -> Intent | Refusal:
             clarifying_question="Provide time range with at least 2 trading days.",
         )
 
-    # C + E. Realized volatility rules
+    # C + D. Realized volatility rules
     if intent.tool == ToolName.realized_volatility:
         # window parameter is required for realized volatility
         if intent.params.window is None:
@@ -52,8 +54,31 @@ def validate_intent(intent: Intent) -> Intent | Refusal:
                 ),
             )
 
-    # D. Window not allowed for other metrics
-    if intent.tool != ToolName.realized_volatility and intent.params.window is not None:
+    # E + F. Sharpe ratio rules
+    if intent.tool == ToolName.sharpe_ratio:
+        # window parameter is required for Sharpe ratio
+        if intent.params.window is None:
+            return make_refusal(
+                reason="Sharpe ratio requires a window parameter.",
+                clarifying_question="Provide window parameter for Sharpe ratio.",
+            )
+        # window parameter must be less than the number of trading days in time range
+        if intent.params.window >= intent.time_range.n_days:
+            return make_refusal(
+                reason=(
+                    "Window parameter must be less than the number of trading days "
+                    "in the time range."
+                ),
+                clarifying_question=(
+                    f"Provide a window parameter less than {intent.time_range.n_days}."
+                ),
+            )
+
+    # G. Window not allowed for other metrics
+    if (
+        intent.tool not in [ToolName.realized_volatility, ToolName.sharpe_ratio]
+        and intent.params.window is not None
+    ):
         tool_label = _tool_label(intent.tool)
 
         return make_refusal(

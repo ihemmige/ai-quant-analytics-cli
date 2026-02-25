@@ -150,7 +150,7 @@ def test_all_registry_defined_tools_wired(cid):
             tool=tool,
             params=(
                 Params(window=5, annualization_factor=252)
-                if tool == ToolName.realized_volatility
+                if tool in [ToolName.realized_volatility, ToolName.sharpe_ratio]
                 else Params(window=None)
             ),
         )

@@ -77,11 +77,12 @@ def realized_volatility(prices: NDArray[np.float64], params: Params) -> float:
 
     validated_prices = _validate_prices(prices)
 
+    if not np.isfinite(params.annualization_factor) or params.annualization_factor <= 0:
+        raise ValueError("annualization_factor must be a positive finite number.")
+
     window = params.window
     if window is None:
         raise ValueError("Window must be provided for realized volatility.")
-    if window <= 0:
-        raise ValueError("Window must be a positive integer.")
     if window < 2:
         raise ValueError("Window must be at least 2 to compute sample std (ddof=1).")
 
@@ -104,3 +105,41 @@ def realized_volatility(prices: NDArray[np.float64], params: Params) -> float:
     if not np.isfinite(vol):
         raise ValueError("Computed volatility is not finite.")
     return vol * float(np.sqrt(params.annualization_factor))
+
+
+def sharpe_ratio(prices: NDArray[np.float64], params: Params) -> float:
+    validated_prices = _validate_prices(prices)
+
+    if not np.isfinite(params.annualization_factor) or params.annualization_factor <= 0:
+        raise ValueError("annualization_factor must be a positive finite number.")
+
+    window = params.window
+    if window is None:
+        raise ValueError("Window must be provided for Sharpe ratio.")
+    if window < 2:
+        raise ValueError("Window must be at least 2 to compute sample std (ddof=1).")
+
+    if np.any(validated_prices <= 0):
+        raise ValueError("Prices must be strictly positive to compute log returns.")
+
+    if validated_prices.size < window + 1:
+        raise ValueError(
+            f"At least {window + 1} price points are required to compute Sharpe "
+            f"ratio with window={window}."
+        )
+
+    log_returns = np.log(
+        validated_prices[1:] / validated_prices[:-1]
+    )  # length = validated_prices.size - 1
+    window_returns = log_returns[-window:]
+
+    mean_return = float(np.mean(window_returns))
+    if not np.isfinite(mean_return):
+        raise ValueError("Computed mean return is not finite.")
+    vol = float(np.std(window_returns, ddof=1))
+    if not np.isfinite(vol):
+        raise ValueError("Computed volatility is not finite.")
+    if vol <= 0.0 or np.isclose(vol, 0.0):
+        raise ValueError("Volatility is zero, Sharpe ratio is undefined.")
+
+    return (mean_return / vol) * float(np.sqrt(params.annualization_factor))

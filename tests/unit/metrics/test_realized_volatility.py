@@ -52,9 +52,9 @@ def test_realized_volatility_with_nans_raises():
 def test_realized_volatility_inf_raises():
     params = Params(window=2)
     with pytest.raises(ValueError):
-        realized_volatility(np.array([100.0, np.inf, 110.0]), params)
+        realized_volatility(np.array([100.0, np.inf, 110.0], dtype=np.float64), params)
     with pytest.raises(ValueError):
-        realized_volatility(np.array([100.0, -np.inf, 110.0]), params)
+        realized_volatility(np.array([100.0, -np.inf, 110.0], dtype=np.float64), params)
 
 
 def test_realized_volatility_window_required():
@@ -86,3 +86,15 @@ def test_realized_volatility_insufficient_data_raises():
     params = Params(window=5)
     with pytest.raises(ValueError):
         realized_volatility(prices, params)
+
+
+def test_realized_volatility_invalid_annualization_factor_raises():
+    prices = np.array([100.0, 110.0, 120.0, 130.0], dtype=np.float64)
+    with pytest.raises(ValueError):
+        realized_volatility(prices, Params(window=2, annualization_factor=0))
+    with pytest.raises(ValueError):
+        realized_volatility(prices, Params(window=2, annualization_factor=-1))
+    with pytest.raises(ValueError):
+        realized_volatility(prices, Params(window=2, annualization_factor=np.inf))
+    with pytest.raises(ValueError):
+        realized_volatility(prices, Params(window=2, annualization_factor=np.nan))

@@ -103,3 +103,45 @@ def test_valid_realized_vol_intent_passes():
     assert result.tickers == ["AAPL"]
     assert result.time_range.n_days == 5
     assert result.params.window == 3
+
+
+def test_sharpe_ratio_requires_window():
+    intent = Intent(
+        tickers=["AAPL"],
+        time_range=TimeRange(n_days=5),
+        tool=ToolName.sharpe_ratio,
+        params=Params(),
+    )
+    result = validate_intent(intent)
+    assert isinstance(result, Refusal)
+    assert "window parameter" in result.reason and "Sharpe ratio" in result.reason
+
+
+def test_sharpe_ratio_window_too_large():
+    intent = Intent(
+        tickers=["AAPL"],
+        time_range=TimeRange(n_days=5),
+        tool=ToolName.sharpe_ratio,
+        params=Params(window=5),
+    )
+    result = validate_intent(intent)
+    assert isinstance(result, Refusal)
+    assert (
+        "Window parameter" in result.reason
+        and "less than the number of trading days" in result.reason
+    )
+
+
+def test_valid_sharpe_ratio_intent_passes():
+    intent = Intent(
+        tickers=["AAPL"],
+        time_range=TimeRange(n_days=5),
+        tool=ToolName.sharpe_ratio,
+        params=Params(window=3),
+    )
+    result = validate_intent(intent)
+    assert isinstance(result, Intent)
+    assert result.tool == ToolName.sharpe_ratio
+    assert result.tickers == ["AAPL"]
+    assert result.time_range.n_days == 5
+    assert result.params.window == 3
