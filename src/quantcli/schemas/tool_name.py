@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ToolName(str, Enum):
+class ToolName(StrEnum):
     max_drawdown = "max_drawdown"
     realized_volatility = "realized_volatility"
     total_return = "total_return"
