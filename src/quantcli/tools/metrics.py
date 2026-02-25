@@ -110,7 +110,8 @@ def realized_volatility(prices: NDArray[np.float64], params: Params) -> float:
 def sharpe_ratio(prices: NDArray[np.float64], params: Params) -> float:
     validated_prices = _validate_prices(prices)
 
-    if not np.isfinite(params.annualization_factor) or params.annualization_factor <= 0:
+    af = params.annualization_factor
+    if not np.isfinite(af) or af <= 0:
         raise ValueError("annualization_factor must be a positive finite number.")
 
     window = params.window
@@ -128,18 +129,24 @@ def sharpe_ratio(prices: NDArray[np.float64], params: Params) -> float:
             f"ratio with window={window}."
         )
 
-    log_returns = np.log(
-        validated_prices[1:] / validated_prices[:-1]
-    )  # length = validated_prices.size - 1
+    # risk_free_rate (annualized, log-rate convention)
+    rf_annual = params.risk_free_rate
+    if not np.isfinite(rf_annual):
+        raise ValueError("risk_free_rate must be a finite number.")
+    rf_daily = float(rf_annual) / float(af)
+
+    log_returns = np.log(validated_prices[1:] / validated_prices[:-1])
     window_returns = log_returns[-window:]
 
-    mean_return = float(np.mean(window_returns))
-    if not np.isfinite(mean_return):
-        raise ValueError("Computed mean return is not finite.")
-    vol = float(np.std(window_returns, ddof=1))
+    excess = window_returns - rf_daily
+    mean_excess = float(np.mean(excess))
+    if not np.isfinite(mean_excess):
+        raise ValueError("Computed mean excess return is not finite.")
+
+    vol = float(np.std(excess, ddof=1))
     if not np.isfinite(vol):
         raise ValueError("Computed volatility is not finite.")
     if vol <= 0.0 or np.isclose(vol, 0.0):
         raise ValueError("Volatility is zero, Sharpe ratio is undefined.")
 
-    return (mean_return / vol) * float(np.sqrt(params.annualization_factor))
+    return (mean_excess / vol) * float(np.sqrt(af))

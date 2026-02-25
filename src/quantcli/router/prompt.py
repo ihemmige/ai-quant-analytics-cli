@@ -52,6 +52,7 @@ PARAMS RULES:
 - Allowed params fields:
   - "window" (int)
   - "annualization_factor" (int or float)
+  - "risk_free_rate" (float) — only for "sharpe_ratio"
 - Do NOT include null fields.
 
 If the request is outside supported tools (predictions, advice, comparisons, portfolios, plotting, multi-asset),

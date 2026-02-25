@@ -15,6 +15,7 @@ def validate_intent(intent: Intent) -> Intent | Refusal:
     E. Sharpe ratio requires a window parameter.
     F. For Sharpe ratio, window must be strictly less than n_days.
     G. Window is not allowed for non-volatility metrics.
+    H. risk_free_rate is only allowed for Sharpe ratio.
 
     Returns:
         - Intent if valid and executable
@@ -84,6 +85,14 @@ def validate_intent(intent: Intent) -> Intent | Refusal:
         return make_refusal(
             reason=f"Window parameter is not applicable for {tool_label}.",
             clarifying_question=f"Remove window parameter for {tool_label}.",
+        )
+
+    # H. risk_free_rate only allowed for Sharpe ratio
+    if intent.tool != ToolName.sharpe_ratio and intent.params.risk_free_rate != 0.0:
+        tool_label = _tool_label(intent.tool)
+        return make_refusal(
+            reason=f"risk_free_rate parameter is not applicable for {tool_label}.",
+            clarifying_question=f"Remove risk_free_rate parameter for {tool_label}.",
         )
 
     return intent

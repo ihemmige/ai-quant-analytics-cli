@@ -26,6 +26,7 @@ quantcli "Compute the max drawdown for TSLA over the last 60 days."
 quantcli "Compute realized volatility for MSFT over the last 90 days with a 20 day window."
 quantcli "What was AAPL’s total return over the last 30 days?"
 quantcli "Compute the Sharpe ratio for AAPL over the last 60 days with a 20 day window."
+quantcli "Compute the Sharpe ratio for AAPL over the last 60 days with a 20 day window and a risk free rate of 0.05."
 ```
 
 ### Example invalid query (returns a structured refusal)
@@ -38,9 +39,9 @@ quantcli "Compute Sharpe ratio for AAPL over the last 60 days."
 The following metrics are currently supported for single-asset analysis:
 
 - `max_drawdown`
-- `realized_volatility`
+- `realized_volatility` (requires `window`)
 - `total_return`
-- `sharpe_ratio`
+- `sharpe_ratio` (requires `window`)
 
 `n_days` refers to the number of price observations used in the calculation (minimum 2). For metrics requiring a window, the window must be less than `n_days`.
 

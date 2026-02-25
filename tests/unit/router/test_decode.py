@@ -52,6 +52,32 @@ def test_decode_valid_intent_with_params():
     assert intent.params.window == 20 and intent.params.annualization_factor == 252
 
 
+def test_decode_valid_intent_with_risk_free_rate():
+    raw = """
+    {
+        "type": "intent",
+        "intent": {
+            "tickers": ["AAPL"],
+            "time_range": {"n_days": 60},
+            "tool": "sharpe_ratio",
+            "params": {
+                "window": 20,
+                "risk_free_rate": 0.05
+            }
+        }
+    }
+    """
+    intent = decode_llm_output(raw)
+    assert intent is not None
+    assert isinstance(intent, Intent)
+    assert intent.tickers == ["AAPL"]
+    assert intent.time_range.n_days == 60
+    assert intent.tool == ToolName.sharpe_ratio
+    assert intent.params.window == 20
+    assert intent.params.risk_free_rate == 0.05
+    assert intent.params.annualization_factor == 252
+
+
 def test_decode_refusal():
     raw = """
     {

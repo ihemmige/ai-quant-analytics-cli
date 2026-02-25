@@ -12,3 +12,8 @@ Tool: realized_vol
 Required params: ticker, range, window
 Optional: annualization_factor
 Output: float
+
+Tool: sharpe_ratio
+Required params: ticker, range, window
+Optional: annualization_factor, risk_free_rate
+Output: float

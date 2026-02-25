@@ -74,6 +74,7 @@ def test_run_query_happy_path_total_return(cid):
     assert result.metadata["range_n_days"] == 10
     assert result.metadata["window"] is None
     assert result.metadata["annualization_factor"] is None
+    assert result.metadata["risk_free_rate"] is None
     assert result.metadata["data_points"] == 10
     assert result.metadata["price_source"] == "FakePriceProvider"
     assert result.metadata["tool_version"] == "1.0.0"
@@ -106,6 +107,7 @@ def test_run_query_happy_path_max_drawdown(cid):
     assert result.metadata["range_n_days"] == 10
     assert result.metadata["window"] is None
     assert result.metadata["annualization_factor"] is None
+    assert result.metadata["risk_free_rate"] is None
     assert result.metadata["data_points"] == 10
     assert result.metadata["price_source"] == "FakePriceProvider"
     assert result.metadata["tool_version"] == "1.0.0"
@@ -143,6 +145,45 @@ def test_run_query_happy_path_realized_volatility(cid):
     assert result.metadata["range_n_days"] == 10
     assert result.metadata["window"] == 5
     assert result.metadata["annualization_factor"] == 252
+    assert result.metadata["risk_free_rate"] is None
+    assert result.metadata["data_points"] == 10
+    assert result.metadata["price_source"] == "FakePriceProvider"
+    assert result.metadata["tool_version"] == "1.0.0"
+    assert result.metadata["interpretation_notes"] is None
+    assert len(llm_client.calls) == 1
+    assert price_provider.calls == 1
+
+
+def test_run_query_happy_path_sharpe_ratio(cid):
+    user_query = (
+        "What is the Sharpe ratio for AAPL over last 10 days with a window of 5?"
+    )
+    llm_response = """
+    {
+        "type": "intent",
+        "intent": {
+            "tickers": ["AAPL"],
+            "time_range": {"n_days": 10},
+            "tool": "sharpe_ratio",
+            "params": {
+                "window": 5
+            }
+        }
+    }
+    """
+    llm_client = FakeLLMClient(llm_response)
+    price_provider = FakePriceProvider("monotonic_up")
+
+    result = run_query(user_query, llm_client, price_provider, cid)
+
+    assert not isinstance(result, Refusal)
+    assert result.tool == ToolName.sharpe_ratio
+    assert result.tickers == ["AAPL"]
+    assert result.value == pytest.approx(1069.0378064250185, abs=1e-9)
+    assert result.metadata["range_n_days"] == 10
+    assert result.metadata["window"] == 5
+    assert result.metadata["annualization_factor"] == 252
+    assert result.metadata["risk_free_rate"] == 0.0
     assert result.metadata["data_points"] == 10
     assert result.metadata["price_source"] == "FakePriceProvider"
     assert result.metadata["tool_version"] == "1.0.0"

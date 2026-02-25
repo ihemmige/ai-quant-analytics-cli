@@ -145,3 +145,32 @@ def test_valid_sharpe_ratio_intent_passes():
     assert result.tickers == ["AAPL"]
     assert result.time_range.n_days == 5
     assert result.params.window == 3
+
+
+def test_valid_sharpe_ratio_with_risk_free_rate_passes():
+    intent = Intent(
+        tickers=["AAPL"],
+        time_range=TimeRange(n_days=5),
+        tool=ToolName.sharpe_ratio,
+        params=Params(window=3, risk_free_rate=0.05),
+    )
+    result = validate_intent(intent)
+    assert isinstance(result, Intent)
+    assert result.tool == ToolName.sharpe_ratio
+    assert result.params.risk_free_rate == 0.05
+
+
+def test_risk_free_rate_not_allowed_for_non_sharpe_metrics():
+    intent = Intent(
+        tickers=["AAPL"],
+        time_range=TimeRange(n_days=5),
+        tool=ToolName.total_return,
+        params=Params(risk_free_rate=0.05),
+    )
+    result = validate_intent(intent)
+    assert isinstance(result, Refusal)
+    assert (
+        "risk_free_rate" in result.reason
+        and "not applicable" in result.reason
+        and "total_return" in result.reason
+    )

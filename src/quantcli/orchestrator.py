@@ -37,9 +37,16 @@ def run_intent(intent: Intent, provider: PriceProvider, cid: str) -> Result | Re
         log_event("metric_fail", cid, tool=validated_intent.tool.value)
         return make_refusal(reason="Unable to compute metric.")
 
+    _uses_annualization = validated_intent.tool in (
+        ToolName.realized_volatility,
+        ToolName.sharpe_ratio,
+    )
     annualization = (
-        validated_intent.params.annualization_factor
-        if validated_intent.tool == ToolName.realized_volatility
+        validated_intent.params.annualization_factor if _uses_annualization else None
+    )
+    risk_free_rate = (
+        validated_intent.params.risk_free_rate
+        if validated_intent.tool == ToolName.sharpe_ratio
         else None
     )
 
@@ -52,6 +59,7 @@ def run_intent(intent: Intent, provider: PriceProvider, cid: str) -> Result | Re
             "range_n_days": validated_intent.time_range.n_days,
             "window": validated_intent.params.window,
             "annualization_factor": annualization,
+            "risk_free_rate": risk_free_rate,
             "data_points": len(prices),
             "price_source": provider.name(),
             "tool_version": "1.0.0",  # TODO

@@ -15,3 +15,12 @@ class Params(BaseModel):
         gt=0,
         description="Factor used to annualize volatility-based metrics.",
     )
+
+    risk_free_rate: float = Field(
+        default=0.0,
+        description=(
+            "Annualized continuously-compounded (log) risk-free rate used for "
+            "Sharpe ratio calculation. Expressed as a decimal "
+            "(e.g. 0.01 for 1% annualized)."
+        ),
+    )

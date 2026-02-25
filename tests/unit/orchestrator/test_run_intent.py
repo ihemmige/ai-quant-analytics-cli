@@ -45,6 +45,7 @@ def test_total_return_ok(cid):
     assert result.metadata["range_n_days"] == 10
     assert result.metadata["window"] is None
     assert result.metadata["annualization_factor"] is None
+    assert result.metadata["risk_free_rate"] is None
     assert result.metadata["data_points"] == 10
     assert result.metadata["price_source"] == "FakePriceProvider"
     assert result.metadata["tool_version"] == "1.0.0"
@@ -71,6 +72,7 @@ def test_max_drawdown_ok(cid):
     assert result.metadata["range_n_days"] == 10
     assert result.metadata["window"] is None
     assert result.metadata["annualization_factor"] is None
+    assert result.metadata["risk_free_rate"] is None
     assert result.metadata["data_points"] == 10
     assert result.metadata["price_source"] == "FakePriceProvider"
     assert result.metadata["tool_version"] == "1.0.0"
@@ -97,6 +99,7 @@ def test_realized_volatility_ok(cid):
     assert result.metadata["range_n_days"] == 10
     assert result.metadata["window"] == 5
     assert result.metadata["annualization_factor"] == 252
+    assert result.metadata["risk_free_rate"] is None
     assert result.metadata["data_points"] == 10
     assert result.metadata["price_source"] == "FakePriceProvider"
     assert result.metadata["tool_version"] == "1.0.0"
@@ -134,10 +137,61 @@ def test_result_metadata_complete(cid):
     assert "range_n_days" in result.metadata
     assert "window" in result.metadata
     assert "annualization_factor" in result.metadata
+    assert "risk_free_rate" in result.metadata
     assert "data_points" in result.metadata
     assert "price_source" in result.metadata
     assert "tool_version" in result.metadata
     assert "interpretation_notes" in result.metadata
+
+
+def test_sharpe_ratio_ok(cid):
+    intent = Intent(
+        tickers=["AAPL"],
+        time_range=TimeRange(n_days=10),
+        tool=ToolName.sharpe_ratio,
+        params=Params(window=5, annualization_factor=252),
+    )
+    provider = FakePriceProvider("monotonic_up")
+    result = run_intent(intent, provider, cid)
+
+    assert isinstance(result, Result)
+    assert result.tool == ToolName.sharpe_ratio
+    assert result.tickers == ["AAPL"]
+    assert result.value == pytest.approx(1069.0378064250185, abs=1e-9)
+    assert result.metadata["range_n_days"] == 10
+    assert result.metadata["window"] == 5
+    assert result.metadata["annualization_factor"] == 252
+    assert result.metadata["risk_free_rate"] == 0.0
+    assert result.metadata["data_points"] == 10
+    assert result.metadata["price_source"] == "FakePriceProvider"
+    assert result.metadata["tool_version"] == "1.0.0"
+    assert result.metadata["interpretation_notes"] is None
+    assert provider.calls == 1
+
+
+def test_sharpe_ratio_with_risk_free_rate_ok(cid):
+    intent = Intent(
+        tickers=["AAPL"],
+        time_range=TimeRange(n_days=10),
+        tool=ToolName.sharpe_ratio,
+        params=Params(window=5, annualization_factor=252, risk_free_rate=0.05),
+    )
+    provider = FakePriceProvider("monotonic_up")
+    result = run_intent(intent, provider, cid)
+
+    assert isinstance(result, Result)
+    assert result.tool == ToolName.sharpe_ratio
+    assert result.tickers == ["AAPL"]
+    assert result.value == pytest.approx(1046.4521693237693, abs=1e-9)
+    assert result.metadata["range_n_days"] == 10
+    assert result.metadata["window"] == 5
+    assert result.metadata["annualization_factor"] == 252
+    assert result.metadata["risk_free_rate"] == 0.05
+    assert result.metadata["data_points"] == 10
+    assert result.metadata["price_source"] == "FakePriceProvider"
+    assert result.metadata["tool_version"] == "1.0.0"
+    assert result.metadata["interpretation_notes"] is None
+    assert provider.calls == 1
 
 
 def test_all_registry_defined_tools_wired(cid):
