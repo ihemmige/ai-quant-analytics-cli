@@ -25,11 +25,13 @@ quantcli "max drawdown AAPL last 10 days"
 quantcli "Compute the max drawdown for TSLA over the last 60 days."
 quantcli "Compute realized volatility for MSFT over the last 90 days with a 20 day window."
 quantcli "What was AAPL’s total return over the last 30 days?"
+quantcli "Compute the Sharpe ratio for AAPL over the last 60 days with a 20 day window."
 ```
 
 ### Example invalid query (returns a structured refusal)
 ```bash
 quantcli "Compute realized volatility for MSFT over the last 90 days."
+quantcli "Compute Sharpe ratio for AAPL over the last 60 days."
 ```
 
 ## Implemented Metrics
@@ -38,8 +40,9 @@ The following metrics are currently supported for single-asset analysis:
 - `max_drawdown`
 - `realized_volatility`
 - `total_return`
+- `sharpe_ratio`
 
-`n_days` refers to the number of price observations used in the calculation (minimum 2).
+`n_days` refers to the number of price observations used in the calculation (minimum 2). For metrics requiring a window, the window must be less than `n_days`.
 
 ## Architecture
 ### Stage 1: Probabilistic Routing

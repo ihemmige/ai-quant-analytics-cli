@@ -38,12 +38,13 @@ SUPPORTED TOOLS (tool must be exactly one of):
 - "total_return"
 - "max_drawdown"
 - "realized_volatility"
+- "sharpe_ratio"
 
 INTENT CONSTRAINTS:
 - Exactly ONE ticker symbol must be explicitly provided.
 - time_range.n_days must be an explicit integer number of days.
-- For "realized_volatility": user MUST explicitly specify "window"; otherwise refuse.
-- For non-volatility tools: MUST NOT include "window" (if user specifies one anyway, refuse).
+- For "realized_volatility" or "sharpe_ratio": user MUST explicitly specify "window"; otherwise refuse.
+- For all other tools: MUST NOT include "window" (if user specifies one anyway, refuse).
 
 PARAMS RULES:
 - Include "params" ONLY if the user explicitly specifies at least one parameter.
